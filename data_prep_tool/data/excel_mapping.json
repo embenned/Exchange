@@ -1,0 +1,9 @@
+{
+  "mappings": [],
+  "parameter_column_mapping": {
+    "sheet": "Train type (2)",
+    "parameter_column": "D",
+    "value_column": "E",
+    "start_row": 1
+  }
+}

@@ -1,0 +1,15 @@
+build/
+dist/
+logs/
+__pycache__/
+*.pyc
+*.spec
+*.log
+application.log
+.pytest_cache/
+*.xlsm
+*.docx
+TrainType.xlsx
+~$*.xlsm
+~$*.docx
+data/word_excel_match_report.json
