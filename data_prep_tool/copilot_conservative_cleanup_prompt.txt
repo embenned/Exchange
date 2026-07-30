@@ -1,0 +1,212 @@
+GITHUB COPILOT TASK: CONSERVATIVE CLEANUP AND READABILITY PASS
+
+Read the current repository before editing. This is not a rewrite and not a redesign. The application and the three-sheet Excel report are already satisfactory. Make only small, evidence-based changes that improve clarity, robustness, maintainability, and user comfort without changing comparison semantics or report appearance.
+
+HARD CONSTRAINTS
+- Do not modify, move, rename, delete, regenerate, or untrack any Excel workbook.
+- In particular, leave all .xls, .xlsx, .xlsm, .xlsb, .xltx, and .xltm files untouched.
+- Verify only that the embedded standard exists at:
+  data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm
+  and that standard_metadata.json points to that exact filename.
+- Do not alter the visual layout, colors, sheet names, tables, filtering policy, or column schema of the generated report.
+- Do not change exact cell-comparison semantics.
+- Do not add pandas, asyncio, multiprocessing, frameworks, or new dependencies.
+- Do not remove compatibility modules such as SharePointRepository, TrainTypeService, ExcelGenerator, or their data files.
+- Do not perform broad reformatting of JSON variants.
+- Preserve strings with leading zeroes.
+- Run tests before and after changes.
+
+1. FIX CONFIRMED REPORT STYLE BUG
+In app/comparison/report_generator.py, _write_deviation_sheet sorts visible_rows when writing them, but styles rows by enumerating the original unsorted visible_rows. This can apply mapped/placeholder/missing-sheet colors to the wrong output rows.
+
+Fix it by creating exactly one sorted_rows list and using that same list for both:
+- writing worksheet rows;
+- calling _style_deviation_row.
+
+Add a regression test with deliberately unsorted deviations whose style categories differ. Verify that after sorting:
+- the mapped row receives green styling in columns F/G;
+- the non-mapped changed-value row receives yellow styling in D/E;
+- styles are attached to the correct cell addresses after loading the saved workbook.
+Do not change the sort order itself.
+
+2. KEEP THE GUI RESPONSIVE WITH A SMALL, SAFE THREADING REFACTOR
+The real comparison took about 310.76 seconds for 372,298 non-empty positions. CompareTab currently performs loading, passive-rule indexing, and comparison on the Tkinter main thread. update_idletasks does not prevent the window from appearing frozen.
+
+Implement a conservative worker pattern only for the long comparison operation:
+- threading.Thread(daemon=True)
+- queue.Queue
+- main-thread polling using root.after(100, callback)
+- worker creates WorkbookComparator, calls compare_sheets(), closes workbooks in finally, and posts progress/result/error messages to the queue
+- progress_callback only writes messages to the queue
+- worker must never call Tkinter variables, widgets, filedialog, or messagebox
+- file selection, preview rendering, confirmation, and save dialog remain on the main thread
+- disable Generate while work is active and restore it exactly once
+- prevent a second comparison from starting while one is active
+- preserve typed handling for StandardMetadataError, WorkbookLoadError, ComparisonError, and unexpected exceptions
+- keep report saving on the main thread for now unless saving is demonstrably slow; do not overengineer a second worker
+
+Extract a small non-Tk worker function or result envelope so it can be unit-tested without creating a graphical Tk root. Add focused tests for success and exception delivery through the queue.
+
+3. SPLIT REPORT GENERATOR INTO SMALL INTERNAL MODULES WITHOUT CHANGING OUTPUT
+app/comparison/report_generator.py has grown to roughly 22.5 KB and mixes:
+- report policy/counting;
+- summary content;
+- workbook styling constants;
+- deviation sheet writing;
+- file output.
+
+Make a modest internal refactor, not a redesign:
+- keep ReportGenerator as the public entry point;
+- move immutable colors, widths, fonts, fills, borders, page margins, headers, and table names into app/comparison/report_styles.py;
+- optionally move summary-sheet construction into app/comparison/report_summary.py only if doing so clearly reduces report_generator.py complexity;
+- do not introduce classes that only wrap one function;
+- do not create a generic styling framework;
+- preserve byte-level data content and all tested workbook properties;
+- preserve the exact three worksheet names and order;
+- preserve table names SummaryBySheet, ActionableDeviationsTable, AllCellDifferencesTable.
+
+Add no new visual features in this task. Existing report tests must still pass.
+
+4. REMOVE SMALL AI-LIKE OR REDUNDANT CODE PATTERNS
+Apply only these targeted cleanups:
+
+A. app/comparison/workbook_comparator.py
+- Remove the compare() alias if repository-wide search proves nothing uses it. compare_sheets() is already the established API and a one-line alias adds noise.
+- Simplify _load_workbook exception handling. The BadZipFile branch duplicates almost the same fallback logic as the general exception branch. Use one normal-load failure path that:
+  1. retains normal_exc;
+  2. if msoffcrypto is unavailable, raises WorkbookLoadError chained from normal_exc;
+  3. otherwise tries protected loading once;
+  4. reports concise messages from both failures without exposing passwords.
+- Keep data_only=True, read_only=True, keep_vba=True.
+- Add precise return type hints using Any where needed.
+
+B. app/comparison/report_generator.py
+- Remove unused imports such as get_column_letter if repository/file inspection confirms they are unused.
+- Replace untyped helper arguments and returns with practical type hints. Do not add complex Protocol types.
+- Avoid repeated creation of identical Font, Fill, Side, Border, Alignment objects inside every data row. Define reusable immutable style objects once at module level or in report_styles.py and assign copy(...) where openpyxl requires it. This is a safe report-generation optimization.
+- Rename local variables only when current names are ambiguous. Avoid churn.
+
+C. app/services/data_update_service.py
+- Current atomic write leaves a temporary file behind if json.dump or os.replace fails. Wrap the temporary-write/replace sequence with cleanup in finally or except.
+- Use encoding="utf-8" for writing unless BOM is intentionally required. Continue reading with utf-8-sig.
+- Keep ensure_ascii=False and indent=2.
+- Do not add locking.
+
+D. app/services/rebuild.py and app/services/excel_generator.py
+- Ensure every newly created or loaded openpyxl workbook is closed in finally after save or failure.
+- Do not alter generated workbook content.
+
+E. build.ps1
+- Print the resolved Python path and `python --version` before installing/building.
+- Keep the existing parameterized interpreter and PyInstaller flags.
+
+5. CORRECT DOCUMENTATION THAT IS NOW FACTUALLY STALE
+Update README.md conservatively:
+- fix the corrupted build command that currently contains a control/backspace character before build.ps1; it must display exactly `.\build.ps1`;
+- document optional custom interpreter: `.\build.ps1 -Python "C:\Program Files\Python314\python.exe"`;
+- update directory tree to include app/comparison, app/runtime_assets.py, app/ui/compare_tab.py, data/standards/7_7_2, and tests;
+- state clearly that the primary Generate tab uses RebuildService plus data/train_type_variants/*.json;
+- label TrainTypeService, ExcelGenerator, train_type_values.json, excel_mapping.json, and SharePointRepository as retained compatibility/legacy components, not the current primary GUI generation path;
+- correct layering guidance: UI may depend on services and comparison orchestration; comparison is its own package;
+- do not describe placeholder SharePoint URLs as deployed/operational;
+- keep the README concise.
+
+6. CLEAN RUNTIME METADATA WITHOUT LOSING THE FEATURE
+The tracked data/metadata.json contains a personal runtime generation record with a local user path. This is a generated event and should not be committed as default application data.
+
+Reset only data/metadata.json to:
+{
+  "schema_version": "1.0",
+  "description": "Train Type Data Preparation Tool metadata",
+  "generation_history": []
+}
+
+Do not remove generation logging from the application. Add a test that records an event in a temporary metadata file by patching the module constant, and verify atomic valid JSON output. Do not write a user-specific path into tracked fixtures.
+
+7. GIT HYGIENE WITHOUT TOUCHING EXCEL FILES
+Do not alter any Excel file or Excel tracking state.
+
+The repository still tracks __pycache__/*.pyc despite ignore rules. Remove only tracked Python bytecode/cache files from the Git index. Use git ls-files to enumerate exact paths and git rm --cached for those paths. Do not delete source files.
+
+Ensure .gitignore contains:
+- __pycache__/
+- *.py[cod]
+- .pytest_cache/
+- .mypy_cache/
+- .ruff_cache/
+- logs/
+- build/
+- dist/
+- repo_full_export.txt
+- repo_full_export2.txt
+- repo_after_*.txt
+- application.log
+
+Remove redundant `*.pyc` only if `*.py[cod]` is retained, because both are unnecessary together.
+
+Do not remove or alter Excel-related .gitignore entries in this task.
+
+Decide one home for export_full_repo.py:
+- preferred: tools/export_full_repo.py, tracked as a developer utility;
+- update OUTPUT_FILE to repo_full_export.txt and preserve self-exclusion;
+- add a short README developer note;
+- if moving it would add unnecessary scope, leave it untracked and state that decision.
+Do not silently leave an unexplained utility at repository root.
+
+8. MAKE TESTS EASIER TO MAINTAIN WITHOUT REORGANIZING EVERYTHING
+Keep unittest. Do not migrate to pytest.
+
+Add small test helper functions for repeated temporary metadata/workbook creation only where they remove obvious duplication. Do not split the entire test suite unless a natural boundary is clear.
+
+Add tests for:
+- sorted-row styling regression;
+- worker success/error queue behavior;
+- DataUpdateService temporary-file cleanup and valid atomic JSON;
+- standard workbook path and metadata filename consistency;
+- report sheet order, table names, headers, and current visual properties remain unchanged.
+
+Do not use the real 6 MB standard workbook in ordinary unit tests except for a simple existence/path consistency assertion.
+
+9. DO NOT CHANGE THESE BEHAVIORS
+- Three report sheets and their current visual layout.
+- Actionable policy: Parameter or Rule exists OR Standard Value is not None/blank/"-".
+- Full raw differences retained.
+- Exact matching of Passive Rules.
+- Existing ignored-sheet metadata.
+- Password handling and password value.
+- Numeric/string type distinctions, including 4 versus "00000004".
+- Standard workbook location.
+- Existing Excel workbooks.
+
+10. VALIDATION
+Before edits run:
+python -m compileall .
+python -m unittest discover -s tests
+
+After edits run:
+python -m compileall .
+python -m unittest discover -s tests
+
+Also run:
+git status --short
+git ls-files | findstr /i "__pycache__ .pyc"
+
+Programmatically generate a tiny report and verify:
+- sheet order is Summary, List of Project Deviations, All Cell Differences;
+- existing titles, colors, freeze panes, widths, table names, and headers are unchanged;
+- sorted rows receive the correct direct styles;
+- no full local paths appear in the report;
+- standard workbook mtime and SHA-256 are unchanged.
+
+11. FINAL RESPONSE FORMAT
+Provide factual results only:
+1. Files changed.
+2. Why each change was made.
+3. Tests added or updated.
+4. Exact compileall result.
+5. Exact unittest result.
+6. Git bytecode cleanup result.
+7. Standard workbook path, mtime, and SHA-256 before/after.
+8. Any skipped instruction and concrete reason.
+
+Do not claim manual GUI validation unless it was actually performed. Do not claim performance improvement without measurements. Do not touch Excel files.
