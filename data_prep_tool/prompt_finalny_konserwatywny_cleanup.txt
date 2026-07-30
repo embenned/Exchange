@@ -1,0 +1,132 @@
+GITHUB COPILOT TASK: FINAL CONSERVATIVE REPOSITORY HYGIENE PASS
+
+Read the current repository and git status before editing. This is a final cleanup, not a redesign. Preserve application behavior, comparison semantics, report layout, colors, sheet names, actionable policy, Passive Rules matching, and all existing Excel files on disk.
+
+HARD RULES
+- Do not edit, move, rename, regenerate, or delete any .xls, .xlsx, .xlsm, .xlsb, .xltx, .xltm file.
+- Do not change the embedded standard or its metadata content.
+- Do not modify Train Type JSON values.
+- Do not add dependencies or frameworks.
+- Do not redesign GUI or report.
+- Do not perform broad formatting churn.
+- Use unittest, not pytest migration.
+
+1. FINISH THE CURRENT GIT CLEANUP
+The current status shows important untracked source files:
+- app/comparison/compare_worker.py
+- app/comparison/report_styles.py
+- legacy/developer_utility/create_template.py
+
+Ensure these files are intentionally added to Git because tracked code imports the first two and README documents the third. Confirm the root create_template.py deletion and legacy replacement form one explicit move in the resulting commit.
+
+The repository currently tracks generated reports Workbook_Deviations.xlsx and Workbook_Deviations2.xlsx. Remove only these generated report paths from the Git index using git rm --cached. Do not delete local report files. Add these exact generated report names, plus a general root output rule `/Workbook_Deviations*.xlsx`, to .gitignore. Do not change tracking of templates/train_type_template.xlsx or the embedded standard.
+
+Do not stage unrelated user workbooks or documents from the repository root. Report their presence in final output but do not delete or modify them.
+
+2. CLOSE THE REPORT WORKBOOK RELIABLY
+In app/comparison/report_generator.py, ReportGenerator.generate creates a Workbook but never closes it.
+- initialize workbook = None before try;
+- create and use the workbook as now;
+- close it in finally when not None;
+- preserve ReportGenerationError chaining;
+- add a focused test proving close is attempted after successful save and after save failure, using a mock or a tiny temporary report;
+- do not change workbook output.
+
+3. REMOVE ONLY CONFIRMED DEAD NOISE
+After repository-wide search:
+- remove DEVIATION_CELL_ALIGNMENT from report_styles.py if unused;
+- replace unused assignments `_summary_sheet`, `_actionable_sheet`, `_raw_sheet` with direct method calls;
+- use `self.headers` in _configure_deviation_sheet instead of duplicating the same seven header strings, or make one immutable HEADERS constant shared by the property and writer;
+- add practical Worksheet and DeviationRecord type hints where they improve readability, but do not introduce Protocols or a typing framework;
+- retain copy() for openpyxl styles where appropriate.
+
+4. FIX DEVELOPER TOOL LOCATION AND EXPORT IGNORE RULE
+Move export_full_repo.py to tools/export_full_repo.py and add tools/__init__.py only if needed. The script must still work when launched from repository root:
+python tools/export_full_repo.py
+
+Keep repository root detection explicit and robust. Prefer the parent of the tools directory rather than Path.cwd(), so launching from another directory does not export the wrong tree.
+
+Update .gitignore to use:
+repo_full_export*.txt
+repo_after_*.txt
+and remove redundant numeric-specific export entries.
+
+Add a short README section "Developer utilities" explaining:
+- tools/export_full_repo.py creates a review export and is not runtime code;
+- legacy/developer_utility/create_template.py recreates only the legacy template and is not required for normal Generate-tab operation.
+
+5. CORRECT README SETUP SEMANTICS
+The current README says "Create the Excel template (run once)" as an ordinary setup step. This is misleading because the primary Generate tab uses RebuildService and JSON variants.
+- remove this from mandatory setup;
+- keep it under an optional legacy/developer utility subsection;
+- state that templates/train_type_template.xlsx is already present and only used by the retained compatibility path;
+- state that normal setup is install dependencies, run main.py;
+- keep the README concise.
+
+6. DEFINE LINE ENDING POLICY
+Add .gitattributes with conservative rules:
+* text=auto
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.ps1 text eol=crlf
+*.xlsx binary
+*.xlsm binary
+*.docx binary
+
+Do not normalize binary files. After adding .gitattributes, do not mass-rewrite every text file in this task. The purpose is stable future diffs.
+
+7. OPTIONAL FLOAT DISPLAY IMPROVEMENT, ONLY IF TESTED
+Do not change comparison values or equality. The current report can display floating-point artifacts such as 9.071999999999999.
+
+Implement only a presentation-layer number format if it can be done without converting values to strings:
+- retain numeric cell values;
+- for float values in Standard Value and Project Value cells, set Excel number format to `0.###############`;
+- integers and strings remain unchanged;
+- raw values and comparison semantics remain exact;
+- add a test that 9.071999999999999 remains a numeric value after reopening the report and has the requested display format.
+
+If this changes expected business presentation or existing tests indicate a conflict, skip it and state why.
+
+8. TEST STRUCTURE, WITHOUT A LARGE REORGANIZATION
+Keep tests/test_core.py unless there is a clear maintenance benefit. Do not split the suite merely for aesthetics. Add only focused tests for:
+- ReportGenerator workbook cleanup;
+- shared report headers if refactored;
+- export tool root detection;
+- float presentation only if implemented.
+
+9. VALIDATION
+Before edits:
+python -m compileall .
+python -m unittest discover -s tests
+
+After edits:
+python -m compileall .
+python -m unittest discover -s tests
+python tools/export_full_repo.py
+
+git status --short
+git diff --check
+git ls-files | findstr /i "__pycache__ .pyc Workbook_Deviations"
+
+Verify programmatically:
+- report worksheets remain exactly Summary, List of Project Deviations, All Cell Differences;
+- report table names and visual properties remain unchanged;
+- standard workbook path, size, mtime, and SHA-256 are unchanged;
+- templates/train_type_template.xlsx is unchanged;
+- no tracked Python bytecode remains;
+- no generated deviation report remains tracked;
+- compare_worker.py and report_styles.py are tracked.
+
+10. FINAL RESPONSE
+Report factual outcomes only:
+- files changed and why;
+- exact compileall and unittest results;
+- exact git hygiene result;
+- standard workbook SHA-256 before and after;
+- whether float formatting was implemented or skipped and why;
+- any unrelated untracked root workbooks/documents left untouched;
+- any instruction skipped with concrete reason.
+
+Do not claim manual GUI testing unless performed. Do not claim performance gains without measurement. Do not touch existing Excel files.
