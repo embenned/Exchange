@@ -1,0 +1,450 @@
+GITHUB COPILOT TASK: PRECISE REPOSITORY CLEANUP, PERFORMANCE FIXES, AND EXACT EXCEL REPORT REDESIGN
+
+Work inside the existing Python repository. Read the actual files before changing anything. Do not rewrite the application. Do not invent new domain rules. Preserve the existing two working features:
+1. Generate Train Type / IMU workbook from Generic, Heavy Diesel, and Light Diesel JSON variants.
+2. Compare a user-selected FastPrep project workbook against the embedded FastPrep 7.7.2 standard and create Workbook_Deviations.xlsx.
+
+CRITICAL USER CONSTRAINT ABOUT EXCEL FILES IN THE REPOSITORY
+Leave all existing Excel workbooks in the repository alone. Do not delete, move, rename, untrack, regenerate, edit, or normalize any .xls, .xlsx, .xlsm, .xlsb, .xltx, or .xltm file.
+
+The only Excel-related repository check allowed is to verify that this required embedded standard exists at exactly:
+data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm
+
+Also verify that:
+data/standards/7_7_2/standard_metadata.json
+contains:
+"workbook_file": "standard_7_7_2_precalculated_UNLOCKED.xlsm"
+
+If both are correct, do not touch either file. If the standard workbook is missing, do not fabricate it and do not copy another workbook into its place. Report the missing path clearly.
+
+Do not change .gitignore rules for Excel files in this task. Do not run git rm on Excel files. Do not delete Workbook_Deviations files already present in the repository.
+
+CURRENT VERIFIED REPORT PROBLEM
+The current Workbook_Deviations2.xlsx has exactly one worksheet named "List of Project Deviations". It contains 6,621 data rows and seven columns:
+Change No, Sheet, Cell, Standard Value, Project Value, Parameter, Rule.
+
+The current formatting is only a dark-blue header plus fixed widths, freeze pane A2, and an auto-filter. It has no title block, no summary sheet, no raw-vs-actionable separation, no Excel table style, no conditional formatting, no legend, no print setup, no row banding, no styled section hierarchy, and no visual indication of mapped/unmapped rows.
+
+Measured report facts:
+- total raw differences: 6,621
+- sheets represented: 36
+- rows with Parameter: 216
+- rows with Rule: 216
+- rows where Standard Value is None, blank, or "-": 5,824
+- largest sources include MVB.ProcessData 2,630; test IO_to_monitor 587; Train type 578; IO_listing 395; Test Binary Outputs 378; Test Binary Inputs 353; Communication config. 304.
+
+The report must remain complete. Never discard raw differences. The redesign must create a concise actionable view while retaining the full raw view.
+
+PART 1: EXACT OUTPUT WORKBOOK STRUCTURE
+Modify app/comparison/report_generator.py so generated report workbooks contain exactly these worksheets in this exact order:
+1. Summary
+2. List of Project Deviations
+3. All Cell Differences
+
+Do not create any additional worksheet.
+
+PART 2: EXACT SEVEN-COLUMN SCHEMA
+Both deviation worksheets must use exactly these columns in exactly this order:
+A: Change No
+B: Sheet
+C: Cell
+D: Standard Value
+E: Project Value
+F: Parameter
+G: Rule
+
+Do not add Change Type, Status, Mapping Status, Notes, Category, or any other column.
+
+PART 3: RAW AND ACTIONABLE DATA RULES
+All Cell Differences:
+- include every DeviationRecord in result.deviations;
+- do not suppress, group, merge, collapse, or deduplicate distinct cell addresses;
+- independently number Change No from 1;
+- use the existing deterministic sheet/cell sorting.
+
+List of Project Deviations:
+- include a deviation when at least one of these is true:
+  1. Parameter is non-empty after stripping;
+  2. Rule is non-empty after stripping;
+  3. Standard Value is not a placeholder.
+- placeholder values for this filtering only are:
+  - None
+  - empty string after stripping
+  - "-" after stripping
+- the following are NOT placeholders: 0, 0.0, False, "0", "FALSE", "NO", "ERROR", "Not Used".
+- independently number Change No from 1.
+
+Create one shared pure policy module:
+app/comparison/deviation_policy.py
+with exactly:
+- is_placeholder(value: Any) -> bool
+- is_actionable(deviation: DeviationRecord) -> bool
+
+ReportGenerator and CompareTab must both use this shared policy. Do not duplicate the filtering logic.
+
+PART 4: EXACT VISUAL DESIGN OF THE SUMMARY WORKSHEET
+The Summary worksheet must be polished and presentation-ready. Implement the following exact layout.
+
+General:
+- worksheet title: Summary
+- hide gridlines
+- tab color: 1F4E78
+- zoomScale: 90
+- freeze panes: A8
+- page orientation: landscape
+- fitToWidth: 1
+- fitToHeight: 0
+- margins: left 0.25, right 0.25, top 0.5, bottom 0.5, header 0.2, footer 0.2
+- repeat rows 1:7 when printed
+
+Column widths:
+- A = 3
+- B = 32
+- C = 22
+- D = 22
+- E = 22
+- F = 22
+- G = 3
+
+Title block:
+- merge B2:F2
+- B2 text: "FastPrep Comparison Report"
+- fill B2:F2: dark navy 17365D
+- font: white, bold, 18 pt
+- alignment: left, vertical center
+- row 2 height: 30
+
+Subtitle:
+- merge B3:F3
+- B3 text: "Project deviations against embedded standard"
+- fill B3:F3: light blue D9EAF7
+- font: dark navy 17365D, italic, 11 pt
+- vertical center
+- row 3 height: 22
+
+Metadata section:
+- B5 = "Standard"
+- C5:F5 merged and contain metadata.display_name
+- B6 = "Standard file"
+- C6:F6 merged and contain only the standard workbook filename, not a full local path
+- B7 = "Project file"
+- C7:F7 merged and contain only the project workbook filename, not a full local path
+- labels B5:B7 use medium-blue fill 5B9BD5, white bold font
+- values C5:F7 use fill EAF2F8, dark font
+- apply thin light-gray borders around B5:F7
+
+KPI cards:
+- B9:C9 merged, B10:C11 merged; D9:E9 merged, D10:E11 merged; F9:F9 and F10:F11 may remain single-column merged vertically only if valid. Prefer three equal-width cards using B:C, D:E, and F:F only if visually balanced; otherwise use B:C, D:E, F:G after expanding G. The final layout must have three aligned cards.
+- Card 1 label: "Raw differences"; value: total raw differences
+- Card 2 label: "Actionable differences"; value: actionable differences
+- Card 3 label: "Passive Rules mapped"; value: count where Parameter or Rule is non-empty
+- label fill: 4472C4, white bold font, centered
+- value fill: D9E2F3, dark navy bold font, 18 pt, centered
+- medium border around each card
+- values use integer number format #,##0
+
+Additional metrics:
+- B13 = "Sheets compared"
+- C13 = total_sheets_compared
+- D13 = "Non-empty positions compared"
+- E13 = total_cells_compared
+- F13 = "Execution time [s]"
+- corresponding value in adjacent cell; if layout requires G13, set G width appropriately
+- metric labels use gray-blue fill D9E1F2 and bold font
+- metric values use white fill and thin borders
+- execution time format: 0.00
+
+Sheet breakdown table:
+- start at B16
+- headers exactly: Sheet, Raw differences, Actionable differences, Passive Rules mapped
+- make it a real openpyxl Table with displayName "SummaryBySheet" and TableStyleMedium2
+- sort rows by Raw differences descending, then Sheet ascending
+- write one row for every sheet represented in raw deviations
+- apply integer format #,##0 to count columns
+- add data bars to Raw differences and Actionable differences columns using blue color 5B9BD5
+- freeze panes A8 remains
+
+Footer note:
+- below the table, merge B:last_column across one row
+- text exactly: "All Cell Differences contains the complete unfiltered comparison output. List of Project Deviations is the actionable subset."
+- fill F2F2F2, italic dark-gray font, wrap text
+- row height at least 32
+
+PART 5: EXACT VISUAL DESIGN OF BOTH DEVIATION WORKSHEETS
+Apply the same design to both "List of Project Deviations" and "All Cell Differences".
+
+General:
+- hide gridlines
+- zoomScale: 85
+- freeze panes: A5
+- orientation: landscape
+- fitToWidth: 1
+- fitToHeight: 0
+- repeat rows 1:4 when printed
+- margins: left 0.2, right 0.2, top 0.4, bottom 0.4, header 0.2, footer 0.2
+- tab colors:
+  - List of Project Deviations: 70AD47
+  - All Cell Differences: A5A5A5
+
+Title:
+- merge A1:G1
+- List sheet title: "List of Project Deviations"
+- Raw sheet title: "All Cell Differences"
+- fill A1:G1: 17365D
+- font: white, bold, 16 pt
+- alignment: left, vertical center
+- row 1 height: 28
+
+Subtitle:
+- merge A2:G2
+- List subtitle exactly: "Actionable differences. Rows mapped by Passive Rules are highlighted."
+- Raw subtitle exactly: "Complete unfiltered cell-by-cell comparison output."
+- fill A2:G2: D9EAF7
+- font: dark navy 17365D, italic, 10 pt
+- wrap text
+- row 2 height: 24
+
+Count line:
+- merge A3:G3
+- text must include the row count, for example "Rows: 797"
+- fill A3:G3: F2F2F2
+- font: dark gray, bold, 10 pt
+- row 3 height: 20
+
+Header row:
+- headers are on row 4, not row 1
+- fill: 1F4E78
+- font: white, bold, 10 pt
+- alignment: center, vertical center, wrap text
+- row 4 height: 28
+- add thin white inside borders and medium dark-blue bottom border
+- enable autofilter through a real Excel Table rather than only worksheet.auto_filter
+
+Excel tables:
+- List sheet table displayName: "ActionableDeviationsTable"
+- Raw sheet table displayName: "AllCellDifferencesTable"
+- table reference from A4 through G(last data row), or A4:G5 with a single blank data row only if there are zero deviations
+- TableStyleMedium2 for actionable sheet
+- TableStyleMedium4 for raw sheet
+- showRowStripes=True
+- showFirstColumn=False
+- showLastColumn=False
+
+Column widths:
+- A Change No = 12
+- B Sheet = 32
+- C Cell = 12
+- D Standard Value = 34
+- E Project Value = 34
+- F Parameter = 44
+- G Rule = 42
+
+Data cell formatting:
+- font: Calibri 10
+- vertical alignment: top
+- wrap text for B, D, E, F, G
+- horizontal alignment:
+  - A centered
+  - B left
+  - C centered
+  - D left
+  - E left
+  - F left
+  - G left
+- row height must remain automatic; do not set every data row to a fixed large value
+- apply thin light-gray borders to all data cells
+- values None are written as empty string
+- do not convert strings such as "00000004" to numbers
+
+Visual highlighting:
+1. Passive Rules mapped rows:
+   - condition: Parameter non-empty OR Rule non-empty
+   - apply light green fill E2F0D9 to columns F and G only
+   - apply dark green font 375623, bold
+2. Changed value emphasis:
+   - apply light yellow fill FFF2CC to D and E when both Standard and Project values are non-placeholder
+   - do not apply yellow when Standard is None, blank, or "-"
+3. Missing/placeholder standard:
+   - if Standard is placeholder and Project is not placeholder, use pale blue fill DDEBF7 on E only
+4. Missing/placeholder project:
+   - if Project is placeholder and Standard is not placeholder, use pale red fill FCE4D6 on D only
+5. Missing sheet records where Cell == "-":
+   - apply light red fill F4CCCC across A:G
+   - bold dark-red font 9C0006
+
+Use conditional formatting where dependable. If formula-based conditional formatting would be fragile for mixed types, apply styles directly while writing rows. Do not use gradients or excessive colors.
+
+Hyperlinks:
+- do not add hyperlinks to local workbook paths
+- do not add external links
+
+Legend:
+- on Summary only, add a small legend near the KPI area:
+  - green = Passive Rules mapping found
+  - yellow = existing standard value changed
+  - blue = value populated where standard was blank/"-"
+  - red = missing project value or missing sheet
+- use matching fills and concise labels
+
+PART 6: REPORT FILE TECHNICAL REQUIREMENTS
+- output remains .xlsx
+- use openpyxl only
+- create a brand-new Workbook
+- never modify or save source FastPrep workbooks
+- no macros in report
+- no external workbook links
+- no local absolute paths written to report
+- no charts in this version
+- no hidden worksheets
+- keep workbook calculation mode automatic/default
+- set workbook properties:
+  - title = "FastPrep Comparison Report"
+  - subject = "Project deviations against embedded standard"
+  - creator = "Train Type Data Preparation Tool"
+
+PART 7: REQUIRED RESULT CONTEXT
+Extend WorkbookComparisonResult with defaulted fields so existing tests remain compatible:
+- standard_display_name: str = ""
+- standard_workbook_file: str = ""
+- project_workbook_file: str = ""
+
+WorkbookComparator must populate:
+- standard_display_name from metadata.display_name
+- standard_workbook_file from Path(metadata.workbook_path).name
+- project_workbook_file from Path(project_workbook_path).name
+
+Do not include full filesystem paths.
+
+Set execution_time_seconds before ReportGenerator.generate is called so Summary receives the real comparison duration. Separate report-save duration may remain in UI only.
+
+PART 8: COMPARE UI MUST MATCH NEW REPORT
+Update app/ui/compare_tab.py:
+- preview only actionable deviations, using deviation_policy.is_actionable
+- summary must show both:
+  - Raw Deviations
+  - Actionable Deviations
+- rename "Total Cells Compared" to "Non-empty Cell Positions Compared" because current comparator counts only positions where at least one normalized value is non-empty
+- preview title exactly: "Preview of actionable deviations"
+- preview count text must mention actionable count and raw count
+- keep user selection of only Project workbook
+- keep save confirmation
+- do not add a standard workbook picker
+- keep existing standard metadata error handling
+
+PART 9: PASSIVE RULES PARSER OPTIMIZATION
+In app/comparison/passive_rules_parser.py:
+- remove unused column_index_from_string import
+- _safe_int catches only TypeError and ValueError
+- clear self._sheet_indexes at start of build_map
+- return {} immediately when metadata.passive_rules_enabled is false
+- keep exact normalized matching; no lowercasing and no fuzzy matching
+- optimize find_after using bisect_right over value_positions instead of nested scanning
+- deduplicate identical PassiveRuleMatch objects for the same target cell while preserving insertion order
+- replace warning-per-miss with counters and one INFO summary:
+  parsed_candidate_rows, mapped_rows, missing_sheet_rows, invalid_offset_rows, missing_anchor_rows, invalid_target_rows, unexpected_error_rows
+- individual expected misses use DEBUG
+- unexpected exceptions use WARNING with row number and exc_info=True
+
+PART 10: WORKBOOK COMPARATOR SAFE OPTIMIZATION
+In app/comparison/workbook_comparator.py:
+- optional msoffcrypto import catches ImportError only
+- remove unused imports
+- retain normal load first, then optional encrypted fallback
+- preserve both normal-load and fallback error context
+- never log password
+- keep data_only=True, read_only=True, keep_vba=True
+- build Passive Rules map once
+- close both workbooks in finally
+- define MAX_COMPARISON_AREA = 10_000_000
+- before iterating a union range, if rows * columns exceeds this value, raise WorkbookLoadError with sheet name and bounds; do not truncate silently
+- preserve exact comparison of strings and numbers
+- preserve "00000004" as different from 4
+- do not use pandas or multiprocessing
+
+PART 11: REPOSITORY CLEANUP WITHOUT TOUCHING EXCEL FILES
+Do not delete, move, rename, untrack, or modify any Excel file.
+
+Allowed cleanup:
+- remove tracked __pycache__ and *.pyc from Git index
+- ensure __pycache__/, *.py[cod], logs/, build/, dist/, .pytest_cache/, .mypy_cache/, .ruff_cache/, repo_full_export.txt, repo_after_*.txt are ignored
+- keep export_full_repo.py or move it to tools/export_full_repo.py
+- remove unused Python imports only in files changed by this task
+- do not remove SharePointRepository, TrainTypeService, ExcelGenerator, train_type_values.json, excel_mapping.json, create_template.py, or compatibility tests
+- fix README actual architecture instead of creating an unnecessary service facade
+
+PART 12: VERIFIED INVALID JSON ARTIFACTS
+Search data/train_type_variants/*.json for literal serialized Python objects such as:
+<openpyxl.worksheet.formula.ArrayFormula object at 0x...>
+
+These are not Excel files and may be corrected.
+- replace only exact Python/openpyxl object-representation strings with null
+- do not guess formulas
+- do not change valid formula strings beginning with "="
+- add validation in RebuildService rejecting remaining strings beginning with "<openpyxl." or matching " object at 0x...>"
+- error message includes variant file and cell address
+
+PART 13: PORTABLE BUILD AND ENCODING
+- build.ps1 must not contain a personal C:\Users\... Python path
+- use param([string]$Python = "python")
+- use Get-Command to validate interpreter
+- keep current PyInstaller data bundling
+- local JSON readers use utf-8-sig
+- DataUpdateService writes metadata atomically using temp file and os.replace
+
+PART 14: EXACT TESTS
+Add or update tests for all of the following:
+1. Workbook sheet order exactly Summary, List of Project Deviations, All Cell Differences.
+2. Both deviation sheets have headers exactly on row 4 in A4:G4.
+3. Actionable and raw tables exist with exact displayNames.
+4. Title cells and merged ranges exist exactly as specified.
+5. Freeze panes exactly A5 on deviation sheets and A8 on Summary.
+6. Gridlines hidden on all three sheets.
+7. Exact tab colors.
+8. Exact column widths.
+9. None/blank/"-" placeholder rule.
+10. Standard "-" and unmapped appears only in raw.
+11. Standard "-" and mapped appears in both.
+12. Standard 0 to project 1 appears in both.
+13. Summary counts match underlying deviations.
+14. SummaryBySheet table exists.
+15. Result context contains filenames only, not full paths.
+16. Passive Rules parser disabled mode.
+17. Parser cache reset.
+18. find_after optimized behavior returns first valid parameter after anchor.
+19. duplicate PassiveRuleMatch values deduplicated.
+20. invalid serialized openpyxl JSON object rejected, valid formula accepted.
+21. existing Train Type generation tests continue to pass.
+22. embedded standard path check verifies exactly data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm without modifying it.
+
+Use temporary tiny workbooks in tests. Do not use or edit real FastPrep workbooks in unit tests.
+
+PART 15: VALIDATION COMMANDS
+Run before changes:
+python -m compileall .
+python -m unittest discover -s tests
+
+Run after changes:
+python -m compileall .
+python -m unittest discover -s tests
+
+Then create one report using the existing application and verify programmatically:
+- exactly three worksheets in correct order
+- exact table names
+- exact freeze panes
+- exact headers and row positions
+- raw difference count preserved for unchanged inputs
+- actionable count lower than or equal to raw count
+- standard workbook file timestamp and SHA-256 unchanged before vs after task
+
+PART 16: FINAL RESPONSE
+Report only factual outcomes:
+- files changed
+- standard workbook path check result
+- standard workbook SHA-256 before and after
+- Excel report sheet names and row counts
+- tests added/updated
+- exact compileall result
+- exact unittest result
+- any requirement not implemented and concrete reason
+
+Do not say the report is "professional" or "optimized" without verifying the exact workbook properties above. Do not claim manual GUI testing unless it was actually performed. Do not touch any existing Excel file in the repository.
