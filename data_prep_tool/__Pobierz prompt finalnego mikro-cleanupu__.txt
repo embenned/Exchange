@@ -1,0 +1,127 @@
+GITHUB COPILOT TASK: FINAL MICRO-CLEANUP, NO REDESIGN
+
+Read the current repository at commit f693f04400f831095984e642f07ea95f0e2ab748 before editing. This is a very small hygiene pass. Preserve all application behavior, report appearance, comparison semantics, tests, Excel assets, JSON variant values, and the embedded standard.
+
+HARD RULES
+- Do not edit, move, rename, regenerate, delete, or untrack any Excel workbook.
+- Do not change the generated report layout, sheet names, colors, tables, columns, filters, or actionable policy.
+- Do not change Passive Rules matching, value normalization, encryption fallback, or threading design.
+- Do not add dependencies, frameworks, abstractions, or broad refactors.
+- Do not remove legacy compatibility modules in this task.
+- Do not mass-format files.
+
+1. RESOLVE THE ONLY DIRTY GIT STATUS ITEM
+Current git status contains:
+?? export_full_repo.py
+
+README documents tools/export_full_repo.py, but the actual utility remains at repository root. Resolve this inconsistency:
+- create tools/ if absent;
+- move export_full_repo.py to tools/export_full_repo.py;
+- track the moved file;
+- make repository-root detection independent of the current working directory by using Path(__file__).resolve().parents[1];
+- write repo_full_export.txt into that detected repository root;
+- preserve all existing export sections and self-exclusion;
+- add a focused unit test proving root detection works when current working directory is elsewhere;
+- ensure `python tools/export_full_repo.py` works from the repository root.
+
+Do not leave a second copy at repository root.
+
+2. REMOVE IGNORED LOCAL BUILD/RUNTIME CLUTTER FROM THE WORKING TREE ONLY
+The repository root contains ignored local artifacts such as:
+- TrainTypeDataPrepTool.spec
+- Office lock files beginning with ~$ 
+- local user workbooks and documents used for manual testing
+
+Do not delete or modify user workbooks/documents automatically. In the final response, list them as local non-versioned test assets and recommend storing them outside the repository, for example in an ignored local_test_data/ directory.
+
+You may delete the generated TrainTypeDataPrepTool.spec only if it is ignored and not tracked. Do not change build.ps1, which is the selected build source of truth.
+
+Add to .gitignore if not already effectively covered:
+/local_test_data/
+~$*
+
+Do not add a blanket *.xlsx ignore because templates/train_type_template.xlsx is tracked and required.
+
+3. FIX README FACTUAL INCONSISTENCIES ONLY
+README currently documents tools/export_full_repo.py, so keep that after the move.
+
+Clarify the legacy configuration section:
+- SharePointRepository, TrainTypeService, ExcelGenerator, train_type_values.json and excel_mapping.json are retained compatibility components;
+- placeholder SharePoint URLs are not operational until configured;
+- adding a key to train_type_values.json does not add a new option to the primary Generate tab, because the primary tab is driven by RebuildService and data/train_type_variants/*.json;
+- to add a primary train type variant, a corresponding variant definition and RebuildService registration are required.
+
+Remove the stale sentence that says the current primary configuration uses parameter_column_mapping and writes D-to-E, or label it explicitly as legacy behavior.
+
+Do not expand README beyond what is necessary.
+
+4. REMOVE TINY CONFIRMED CODE NOISE
+After repository-wide reference search:
+- in ReportGenerator._configure_deviation_sheet, replace `ReportGenerator().headers` with the class constant or a static immutable header source; do not instantiate ReportGenerator only to read headers;
+- remove ReportGenerator.report_sheet_name property only if it has no references outside tests and no compatibility requirement;
+- change broad `Any` annotations to existing domain types only where obvious, for example DeviationRecord and openpyxl Worksheet; do not introduce Protocols;
+- keep intentional boundary-level `except Exception` blocks in worker fallback, workbook loading fallback, report generation boundary, parser row isolation, and cleanup.
+
+Do not restructure report_generator.py again.
+
+5. REVIEW UNUSED METADATA FIELDS WITHOUT BREAKING COMPATIBILITY
+Search references for:
+- StandardWorkbookMetadata.read_only
+- StandardWorkbookMetadata.precalculated
+- StandardWorkbookMetadata.report_columns
+- StandardWorkbookMetadata.passive_rules_header_row
+- DeviationRecord.change_type
+
+If a field is currently unused but part of metadata compatibility or tests, keep it and add one concise comment or README note only if needed. Do not delete public data fields merely to satisfy a linter. In the final response, report which fields are retained for schema/report compatibility.
+
+6. REMOVE CONFIRMED SERIALIZED OPENPYXL OBJECT ARTIFACTS FROM VARIANT JSON
+The repository export confirms process-memory representations in production variant JSON. These are not formulas or engineering values and must never be written to Excel:
+- data/train_type_variants/Generic.json: B5 and B71
+- data/train_type_variants/HeavyDiesel.json: B5, B69 and B71 if the exact artifact is present
+- data/train_type_variants/LightDiesel.json: B69 if the exact artifact is present
+
+Search all three files directly and build the authoritative exact occurrence list. For every value that is a string beginning with `<openpyxl.` or matching ` object at 0x[0-9A-Fa-f]+>`:
+- replace only that field value with JSON null;
+- do not guess or reconstruct a formula;
+- do not alter the rest of that cell object, style, merging, dimensions, or neighboring values;
+- preserve RebuildService runtime validation so future bad exports fail loudly;
+- add a repository-data test that loads all three real variant JSON files and asserts zero serialized Python/openpyxl object representations;
+- add a generation smoke test for Generic, Heavy Diesel and Light Diesel using temporary output paths, and assert generation completes without that validation error.
+
+Do not treat legitimate null values, "-", UNUSED labels, formulas beginning with "=", hexadecimal values, repeated engineering parameters, SINGS/WINGS names, filter coefficients, or GNSS parameters as AI artifacts. Those are workbook-domain data.
+
+7. TESTS AND VALIDATION
+Before edits run:
+python -m compileall .
+python -m unittest discover -s tests
+
+After edits run:
+python -m compileall .
+python -m unittest discover -s tests
+python tools/export_full_repo.py
+git diff --check
+git status --short
+git ls-files | findstr /i "__pycache__ .pyc Workbook_Deviations TrainTypeDataPrepTool.spec"
+
+Verify:
+- git status is clean after staging/committing intended source changes, or contains only clearly reported local test assets;
+- tools/export_full_repo.py is tracked and root export_full_repo.py no longer exists;
+- no tracked bytecode, generated report, spec file, or Office lock file exists;
+- standard workbook remains exactly at data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm;
+- standard workbook SHA-256 and mtime are unchanged;
+- report still has exactly Summary, List of Project Deviations, All Cell Differences;
+- all tests pass.
+
+8. FINAL RESPONSE
+Provide factual results only:
+1. Files changed and why.
+2. Git status before and after.
+3. Exact compileall and unittest results.
+4. Exporter move and root-detection test result.
+5. Zero or exact count of serialized Python-object artifacts.
+6. Standard workbook SHA-256 before and after.
+7. Unused compatibility fields retained and why.
+8. Local ignored test assets left untouched.
+9. Any skipped instruction and concrete reason.
+
+Do not claim manual GUI testing unless performed. Do not claim performance gains. Do not touch any Excel file.
