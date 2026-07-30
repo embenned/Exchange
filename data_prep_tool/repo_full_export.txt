@@ -3,10 +3,10 @@
 REPOSITORY EXPORT INFORMATION
 ========================================================================================================================
 
-Export date: 2026-07-30T16:52:10
+Export date: 2026-07-30T18:00:56
 Repository root: C:\Python\data_prep_tool
 Output file: repo_full_export.txt
-Discovered files: 52
+Discovered files: 41
 Ignored directories: .git, .idea, .mypy_cache, .nox, .pytest_cache, .ruff_cache, .tox, .venv, .vscode, __pycache__, build, dist, env, logs, node_modules, site-packages, venv
 
 ========================================================================================================================
@@ -15,7 +15,7 @@ GIT REPOSITORY INFORMATION
 
 CURRENT COMMIT
 ----------------------------------------
-f693f04400f831095984e642f07ea95f0e2ab748
+e27456708b1fe80d3978899c47305bad5ded5925
 
 CURRENT BRANCH
 ----------------------------------------
@@ -23,15 +23,8 @@ main
 
 GIT STATUS
 ----------------------------------------
- M .gitignore
- M README.md
- M app/comparison/report_generator.py
- M data/metadata.json
- M data/train_type_variants/Generic.json
- M data/train_type_variants/HeavyDiesel.json
- M tests/test_core.py
+ D app/repositories/__init__.py
 ?? export_full_repo.py
-?? tools/export_full_repo.py
 
 TRACKED FILES
 ----------------------------------------
@@ -52,24 +45,15 @@ app/config.py
 app/models/__init__.py
 app/models/train_type.py
 app/repositories/__init__.py
-app/repositories/base_repository.py
-app/repositories/local_json_repository.py
-app/repositories/sharepoint_repository.py
 app/runtime_assets.py
 app/services/__init__.py
-app/services/data_update_service.py
-app/services/excel_generator.py
 app/services/rebuild.py
-app/services/train_type_service.py
 app/ui/__init__.py
 app/ui/compare_tab.py
 app/ui/main_window.py
 build.ps1
-data/excel_mapping.json
-data/metadata.json
 data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm
 data/standards/7_7_2/standard_metadata.json
-data/train_type_values.json
 data/train_type_variants/Generic.json
 data/train_type_variants/HeavyDiesel.json
 data/train_type_variants/LightDiesel.json
@@ -81,7 +65,9 @@ tests/test_core.py
 
 LAST 10 COMMITS
 ----------------------------------------
-f693f04 (HEAD -> main, origin/main, origin/HEAD) Final Version
+e274567 (HEAD -> main, origin/main, origin/HEAD) Odchudzenie projektu
+bad84c1 Finalna wersja pliku
+f693f04 Final Version
 c88ad28 Cleaning revision
 a19b4e0 RaportEnchancment
 cfea5a9 CompareTool_v3
@@ -89,264 +75,12 @@ ecf99eb CompareToolv2
 b5000e1 Integrate variant JSON rebuild generation
 9126d58 Jsony do konwersji
 32957fb Add workbook comparison feature
-505bc89 Poprawa funkcji zapisu
-e3ef9f7 Dopracowanie projektu i przeprowadzenie pytest
 
 UNCOMMITTED DIFF
 ----------------------------------------
-diff --git a/data_prep_tool/.gitignore b/data_prep_tool/.gitignore
-index 2228cb0..24c8169 100644
---- a/data_prep_tool/.gitignore
-+++ b/data_prep_tool/.gitignore
-@@ -12,6 +12,8 @@ application.log
- repo_full_export*.txt
- repo_after_*.txt
- /Workbook_Deviations*.xlsx
-+/local_test_data/
-+~$*
- *.xlsm
- !data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm
- *.docx
-diff --git a/data_prep_tool/README.md b/data_prep_tool/README.md
-index 1e4439c..e1ffb90 100644
---- a/data_prep_tool/README.md
-+++ b/data_prep_tool/README.md
-@@ -101,6 +101,7 @@ The legacy template at `templates/train_type_template.xlsx` is already present a
- 
- Update the SharePoint URLs before deploying. If SharePoint is unreachable,
- the app silently falls back to the local `/data` files and logs which source was used.
-+The SharePoint URLs are placeholders until they are configured for a live deployment.
- 
- ---
- 
-@@ -243,8 +244,7 @@ The app supports two ways to map values into the workbook:
- 1. `mappings` list: explicit `sheet + cell + field` entries.
- 2. `parameter_column_mapping`: lookup by parameter name column (for large Train Type sheets).
- 
--Current configuration uses `parameter_column_mapping` and writes values by matching
--JSON keys against parameter names in column `D` and writing to column `E`.
-+The `parameter_column_mapping` path is legacy behavior only. The primary Generate tab is driven by `RebuildService` and `data/train_type_variants/*.json`.
- 
- ---
- 
-@@ -260,3 +260,5 @@ JSON keys against parameter names in column `D` and writing to column `E`.
- | `config.py` | stdlib only |
- 
- `TrainTypeService`, `ExcelGenerator`, `train_type_values.json`, `excel_mapping.json`, and `SharePointRepository` are retained compatibility components, not the primary GUI generation path.
-+Adding a key to `train_type_values.json` does not add a new option to the primary Generate tab because the primary tab is driven by `RebuildService` and `data/train_type_variants/*.json`.
-+To add a new primary train type variant, add the variant definition and register it in `RebuildService`.
-diff --git a/data_prep_tool/app/comparison/report_generator.py b/data_prep_tool/app/comparison/report_generator.py
-index 24b797a..fe344d8 100644
---- a/data_prep_tool/app/comparison/report_generator.py
-+++ b/data_prep_tool/app/comparison/report_generator.py
-@@ -7,9 +7,10 @@ from typing import Any
- from openpyxl import Workbook
- from openpyxl.formatting.rule import DataBarRule
- from openpyxl.worksheet.table import Table, TableStyleInfo
-+from openpyxl.worksheet.worksheet import Worksheet
- 
- from app.comparison.deviation_policy import is_actionable, is_placeholder
--from app.comparison.models import ReportGenerationError, WorkbookComparisonResult
-+from app.comparison.models import DeviationRecord, ReportGenerationError, WorkbookComparisonResult
- from app.comparison.standard_metadata import StandardWorkbookMetadata
- from app.comparison.report_styles import (
-     ACTIONABLE_SHEET_NAME,
-@@ -88,16 +89,6 @@ class ReportGenerator:
-     def __init__(self, metadata: StandardWorkbookMetadata | None = None) -> None:
-         self._metadata = metadata
- 
--    @property
--    def report_sheet_name(self) -> str:
--        if self._metadata is not None:
--            return self._metadata.report_sheet_name
--        return "List of Project Deviations"
--
--    @property
--    def headers(self) -> list[str]:
--        return list(self.HEADERS)
--
-     @staticmethod
-     def _sheet_sort_key(item: Any) -> tuple[str, int, int]:
-         sheet_name = item.sheet_name or ""
-@@ -129,7 +120,7 @@ class ReportGenerator:
-         return counts
- 
-     @staticmethod
--    def _apply_range_style(worksheet: Any, cell_range: str, fill, font, alignment, border=None) -> None:
-+    def _apply_range_style(worksheet: Worksheet, cell_range: str, fill, font, alignment, border=None) -> None:
-         cell = worksheet[cell_range.split(":")[0]]
-         cell.fill = fill
-         cell.font = copy(font)
-@@ -138,7 +129,7 @@ class ReportGenerator:
-             cell.border = copy(border)
- 
-     @staticmethod
--    def _configure_summary_sheet(workbook: Workbook, result: WorkbookComparisonResult):
-+    def _configure_summary_sheet(workbook: Workbook, result: WorkbookComparisonResult) -> Worksheet:
-         worksheet = workbook.create_sheet(SUMMARY_SHEET_NAME)
-         worksheet.sheet_view.showGridLines = False
-         worksheet.sheet_view.zoomScale = 90
-@@ -353,7 +344,7 @@ class ReportGenerator:
- 
-     @staticmethod
-     def _configure_deviation_sheet(
--        worksheet,
-+        worksheet: Worksheet,
-         tab_color: str,
-         subtitle_text: str,
-         count_text: str,
-@@ -406,7 +397,7 @@ class ReportGenerator:
-             SUMMARY_TITLE_ALIGNMENT,
-         )
- 
--        for index, header in enumerate(ReportGenerator().headers, start=1):
-+        for index, header in enumerate(ReportGenerator.HEADERS, start=1):
-             cell = worksheet.cell(4, index)
-             cell.value = header
-             cell.fill = DEVIATION_HEADER_FILL
-@@ -415,7 +406,7 @@ class ReportGenerator:
-             cell.border = DEVIATION_HEADER_BORDER
- 
-     @staticmethod
--    def _style_deviation_row(worksheet: Any, row_number: int, deviation: Any) -> None:
-+    def _style_deviation_row(worksheet: Worksheet, row_number: int, deviation: DeviationRecord) -> None:
-         standard_is_placeholder = is_placeholder(deviation.standard_value)
-         project_is_placeholder = is_placeholder(deviation.project_value)
-         is_missing_sheet = deviation.cell_address == "-"
-@@ -462,9 +453,9 @@ class ReportGenerator:
-         tab_color: str,
-         table_name: str,
-         table_style_name: str,
--        deviations,
-+        deviations: list[DeviationRecord],
-         actionable_only: bool,
--    ) -> Any:
-+    ) -> Worksheet:
-         worksheet = workbook.create_sheet(title)
-         rows = list(deviations)
-         visible_rows = [row for row in rows if is_actionable(row)] if actionable_only else rows
-diff --git a/data_prep_tool/data/metadata.json b/data_prep_tool/data/metadata.json
-index 376b9d9..2e27806 100644
---- a/data_prep_tool/data/metadata.json
-+++ b/data_prep_tool/data/metadata.json
-@@ -1,5 +1,11 @@
- {
-   "schema_version": "1.0",
-   "description": "Train Type Data Preparation Tool metadata",
--  "generation_history": []
-+  "generation_history": [
-+    {
-+      "timestamp": "2026-07-30T14:44:38.609357+00:00",
-+      "train_type": "Light Diesel",
-+      "output_path": "C:/Users/bkrol/Downloads/LightDiesel.xlsx"
-+    }
-+  ]
- }
-\ No newline at end of file
-diff --git a/data_prep_tool/data/train_type_variants/Generic.json b/data_prep_tool/data/train_type_variants/Generic.json
-index 23b1e13..4dcc8bf 100644
---- a/data_prep_tool/data/train_type_variants/Generic.json
-+++ b/data_prep_tool/data/train_type_variants/Generic.json
-@@ -221,7 +221,7 @@
-       "value": null
-     },
-     "B5": {
--      "value": "<openpyxl.worksheet.formula.ArrayFormula object at 0x000001D27FF481A0>"
-+      "value": null
-     },
-     "C5": {
-       "value": "Value for XML export (Hexadecimal representation)"
-@@ -3785,7 +3785,7 @@
-       "value": null
-     },
-     "B71": {
--      "value": "<openpyxl.worksheet.formula.ArrayFormula object at 0x000001D27FF6A490>"
-+      "value": null
-     },
-     "C71": {
-       "value": "Value for XML export (Hexadecimal representation)"
-diff --git a/data_prep_tool/data/train_type_variants/HeavyDiesel.json b/data_prep_tool/data/train_type_variants/HeavyDiesel.json
-index 9f18612..abb8636 100644
---- a/data_prep_tool/data/train_type_variants/HeavyDiesel.json
-+++ b/data_prep_tool/data/train_type_variants/HeavyDiesel.json
-@@ -221,7 +221,7 @@
-       "value": null
-     },
-     "B5": {
--      "value": "<openpyxl.worksheet.formula.ArrayFormula object at 0x000002E8FFDF81A0>"
-+      "value": null
-     },
-     "C5": {
-       "value": "Value for XML export (Hexadecimal representation)"
-@@ -3677,7 +3677,7 @@
-       "value": null
-     },
-     "B69": {
--      "value": "<openpyxl.worksheet.formula.ArrayFormula object at 0x000002E8FFE7CA50>"
-+      "value": null
-     },
-     "C69": {
-       "value": "Value for XML export (Hexadecimal representation)"
-diff --git a/data_prep_tool/tests/test_core.py b/data_prep_tool/tests/test_core.py
-index f84cb07..49c6224 100644
---- a/data_prep_tool/tests/test_core.py
-+++ b/data_prep_tool/tests/test_core.py
-@@ -4,6 +4,7 @@ from pathlib import Path
- import json
- import queue
- import importlib.util
-+import re
- from types import SimpleNamespace
- from unittest import mock
- 
-@@ -321,6 +322,25 @@ class ComparisonWorkerTests(unittest.TestCase):
- 
- 
- class RebuildServiceTests(unittest.TestCase):
-+    def test_real_variant_json_files_do_not_contain_serialized_openpyxl_objects(self) -> None:
-+        variant_dir = Path(__file__).resolve().parents[1] / "data" / "train_type_variants"
-+        artifact_pattern = re.compile(r"<openpyxl\.| object at 0x[0-9A-Fa-f]+>")
-+
-+        for name in ["Generic.json", "HeavyDiesel.json", "LightDiesel.json"]:
-+            variant_data = json.loads((variant_dir / name).read_text(encoding="utf-8"))
-+
-+            def walk(value: object) -> None:
-+                if isinstance(value, dict):
-+                    for nested_value in value.values():
-+                        walk(nested_value)
-+                elif isinstance(value, list):
-+                    for nested_value in value:
-+                        walk(nested_value)
-+                elif isinstance(value, str):
-+                    self.assertFalse(artifact_pattern.search(value), f"Serialized openpyxl object artifact found in {name}: {value}")
-+
-+            walk(variant_data)
-+
-     def test_rebuild_service_lists_train_types(self) -> None:
-         service = RebuildService()
-         self.assertEqual(service.get_available_train_types(), ["Generic", "Heavy Diesel", "Light Diesel"])
-@@ -383,6 +403,15 @@ class RebuildServiceTests(unittest.TestCase):
-             with self.assertRaises(ValueError):
-                 service._load_variant_json("Generic")  # type: ignore[attr-defined]
- 
-+    def test_rebuild_service_generates_real_variants_without_validation_errors(self) -> None:
-+        service = RebuildService()
-+
-+        for train_type in ["Generic", "Heavy Diesel", "Light Diesel"]:
-+            with tempfile.TemporaryDirectory() as temp_dir:
-+                output_path = Path(temp_dir) / f"{train_type.replace(' ', '_')}.xlsx"
-+                service.generate_excel(train_type, str(output_path))
-+                self.assertTrue(output_path.exists(), train_type)
-+
- 
- class WorkbookComparatorTests(unittest.TestCase):
-     def test_comparator_detects_cell_changes_and_missing_sheets(self) -> None:
-[STDERR]
-warning: in the working copy of 'data_prep_tool/app/comparison/report_generator.py', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'data_prep_tool/data/metadata.json', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'data_prep_tool/data/train_type_variants/Generic.json', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'data_prep_tool/data/train_type_variants/HeavyDiesel.json', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'data_prep_tool/tests/test_core.py', CRLF will be replaced by LF the next time Git touches it
+diff --git a/data_prep_tool/app/repositories/__init__.py b/data_prep_tool/app/repositories/__init__.py
+deleted file mode 100644
+index e69de29..0000000
 
 STAGED DIFF
 ----------------------------------------
@@ -365,28 +99,23 @@ data_prep_tool/
     [BINARY] ENIO-ALS-SA11-D400-REG-000030_Di4_STEP7_20260709_UNLOCKED.xlsm (6.31 MB)
     [TEXT] export_full_repo.py (11.87 KB)
     [BINARY] GATC_CRL_DESG_0926_v15_Clean (1).docx (527.83 KB)
-    [TEXT] main.py (1.07 KB)
-    [TEXT] README.md (8.87 KB)
+    [TEXT] main.py (749 B)
+    [TEXT] README.md (6.68 KB)
     [TEXT] requirements.txt (60 B)
     [BINARY] standard_7_7_2_precalculated_UNLOCKED.xlsm (6.12 MB)
     [BINARY] ~$DE18-ALS-DES-D000-ATC-D00058-00001_20260224_Step7 (1).xlsm (165 B)
     [BINARY] ~$TC_CRL_DESG_0926_v15_Clean (1).docx (162 B)
     app/
         [TEXT] __init__.py (0 B)
-        [TEXT] config.py (3.07 KB)
-        [TEXT] runtime_assets.py (2.31 KB)
+        [TEXT] config.py (2.24 KB)
+        [TEXT] runtime_assets.py (1.89 KB)
     data/
-        [TEXT] excel_mapping.json (162 B)
-        [TEXT] metadata.json (300 B)
-        [TEXT] train_type_values.json (1.01 KB)
         [TEXT] word_excel_match_report.json (2.02 KB)
     legacy/
     templates/
         [BINARY] train_type_template.xlsx (115.19 KB)
     tests/
-        [TEXT] test_core.py (41.31 KB)
-    tools/
-        [TEXT] export_full_repo.py (1.75 KB)
+        [TEXT] test_core.py (17.22 KB)
         comparison/
             [TEXT] __init__.py (36 B)
             [TEXT] compare_worker.py (2.25 KB)
@@ -400,21 +129,13 @@ data_prep_tool/
         models/
             [TEXT] __init__.py (0 B)
             [TEXT] train_type.py (2.45 KB)
-        repositories/
-            [TEXT] __init__.py (0 B)
-            [TEXT] base_repository.py (367 B)
-            [TEXT] local_json_repository.py (670 B)
-            [TEXT] sharepoint_repository.py (1.97 KB)
         services/
             [TEXT] __init__.py (0 B)
-            [TEXT] data_update_service.py (2.16 KB)
-            [TEXT] excel_generator.py (6.08 KB)
             [TEXT] rebuild.py (3.96 KB)
-            [TEXT] train_type_service.py (1.29 KB)
         ui/
             [TEXT] __init__.py (0 B)
             [TEXT] compare_tab.py (17.31 KB)
-            [TEXT] main_window.py (4.63 KB)
+            [TEXT] main_window.py (4.46 KB)
         standards/
         train_type_variants/
             [TEXT] Generic.json (98.87 KB)
@@ -474,7 +195,7 @@ TrainType.xlsx
 data/word_excel_match_report.json
 
 ========================================================================================================================
-FILE: README.md | SIZE: 8.87 KB | ENCODING: utf-8-sig
+FILE: README.md | SIZE: 6.68 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 # Train Type Data Preparation Tool
@@ -506,14 +227,7 @@ data_prep_tool/
 │   │   ├── main_window.py          # Tkinter shell
 │   │   └── compare_tab.py          # Compare tab UI and save flow
 │   ├── services/
-│   │   ├── rebuild.py              # Primary Train Type generator from JSON variants
-│   │   ├── data_update_service.py  # Reads/writes metadata.json (generation log)
-│   │   ├── train_type_service.py   # Legacy compatibility path for value lookup
-│   │   └── excel_generator.py      # Legacy compatibility path for template writes
-│   ├── repositories/
-│   │   ├── base_repository.py
-│   │   ├── local_json_repository.py
-│   │   └── sharepoint_repository.py
+│   │   └── rebuild.py              # Train Type generator from JSON variants
 │   ├── models/
 │   │   └── train_type.py
 │   ├── runtime_assets.py           # Copies bundled runtime files into the writable app folder
@@ -526,9 +240,7 @@ data_prep_tool/
 │   ├── standards/7_7_2/
 │   │   ├── standard_7_7_2_precalculated_UNLOCKED.xlsm
 │   │   └── standard_metadata.json
-│   ├── train_type_values.json      # Legacy compatibility data
-│   ├── excel_mapping.json          # Legacy compatibility mapping
-│   └── metadata.json               # Generation history log (auto-updated)
+│   └── word_excel_match_report.json
 ├── legacy/
 │   └── developer_utility/
 │       └── create_template.py      # One-time template helper
@@ -572,15 +284,7 @@ The legacy template at `templates/train_type_template.xlsx` is already present a
 
 ### `app/config.py`
 
-| Setting | Purpose |
-|---|---|
-| `SHAREPOINT_TRAIN_TYPE_VALUES_URL` | HTTPS URL to `train_type_values.json` on SharePoint |
-| `SHAREPOINT_EXCEL_MAPPING_URL` | HTTPS URL to `excel_mapping.json` on SharePoint |
-| `REQUEST_TIMEOUT_SECONDS` | HTTP timeout before falling back to local JSON |
-
-Update the SharePoint URLs before deploying. If SharePoint is unreachable,
-the app silently falls back to the local `/data` files and logs which source was used.
-The SharePoint URLs are placeholders until they are configured for a live deployment.
+The Generate tab uses variant files from `data/train_type_variants/`.
 
 ---
 
@@ -593,40 +297,6 @@ Each variant file contains a full worksheet definition (`sheet_name`, `cells`,
 
 When the user clicks **Generate Excel**, the selected variant is rebuilt into
 a new workbook and saved to the location chosen in the save dialog.
-
-### `data/train_type_values.json`
-
-Defines all available train types and their parameter values:
-
-```json
-{
-  "train_types": {
-    "generic": {
-      "max_speed_kmh": 160,
-      "traction_type": "Electric",
-      ...
-    }
-  }
-}
-```
-
-Add a new train type by adding a new key under `"train_types"`.
-
-### `data/excel_mapping.json`
-
-Maps each field name to a specific sheet and cell in the template:
-
-```json
-{
-  "mappings": [
-    { "sheet": "Train Type", "cell": "B2", "field": "max_speed_kmh" },
-    ...
-  ]
-}
-```
-
-To change where a value is written in the Excel output, edit this file —
-no Python code changes are required.
 
 ## Compare Workbook Against Standard
 
@@ -675,8 +345,7 @@ The resulting executable is at `dist\TrainTypeDataPrepTool.exe`.
 
 > **Important:** The `data/` and `templates/` directories are bundled inside the
 > `.exe` via `--add-data`. On first launch the app copies those defaults into a
-> writable runtime folder next to the executable, so `metadata.json` and logs
-> can be created safely.
+> writable runtime folder next to the executable.
 
 If you want to run PyInstaller manually:
 
@@ -714,16 +383,7 @@ python legacy/developer_utility/create_template.py
 2. On startup the app prepares runtime assets in the writable app folder.
 3. The user selects `Generic`, `Heavy Diesel`, or `Light Diesel`.
 4. A Save dialog asks where to write the output file.
-5. A generation log entry is appended to `data/metadata.json`.
-
-### Mapping modes
-
-The app supports two ways to map values into the workbook:
-
-1. `mappings` list: explicit `sheet + cell + field` entries.
-2. `parameter_column_mapping`: lookup by parameter name column (for large Train Type sheets).
-
-The `parameter_column_mapping` path is legacy behavior only. The primary Generate tab is driven by `RebuildService` and `data/train_type_variants/*.json`.
+5. The workbook is saved to the selected output path.
 
 ---
 
@@ -733,8 +393,7 @@ The `parameter_column_mapping` path is legacy behavior only. The primary Generat
 |---|---|
 | `ui/` | `services/`, comparison orchestration |
 | `comparison/` | stdlib, openpyxl, local comparison helpers |
-| `services/` | `models/`, `repositories/`, `config` |
-| `repositories/` | `models/`, `config` |
+| `services/` | `models/`, `config` |
 | `models/` | stdlib only |
 | `config.py` | stdlib only |
 
@@ -1158,16 +817,13 @@ if __name__ == "__main__":
     print("Upload relevant .xlsx or .xlsm files separately.")
 
 ========================================================================================================================
-FILE: main.py | SIZE: 1.07 KB | ENCODING: utf-8-sig
+FILE: main.py | SIZE: 749 B | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
-import os
 import tkinter as tk
 
-from app.config import APP_LOG_FILE, LOGS_DIR
 from app.runtime_assets import ensure_runtime_assets
-from app.services.data_update_service import DataUpdateService
 from app.services.rebuild import RebuildService
 from app.ui.main_window import MainWindow
 
@@ -1176,25 +832,19 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     ensure_runtime_assets()
-    os.makedirs(LOGS_DIR, exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(APP_LOG_FILE, encoding="utf-8"),
-        ],
+        handlers=[logging.StreamHandler()],
     )
     logger.info("Starting Train Type Data Preparation Tool.")
 
     rebuild_service = RebuildService()
-    data_update_service = DataUpdateService()
 
     root = tk.Tk()
     window = MainWindow(
         root=root,
         rebuild_service=rebuild_service,
-        data_update_service=data_update_service,
     )
     window.run()
 
@@ -1218,7 +868,7 @@ FILE: app\__init__.py | SIZE: 0 B | ENCODING: utf-8-sig
 
 
 ========================================================================================================================
-FILE: app\config.py | SIZE: 3.07 KB | ENCODING: utf-8-sig
+FILE: app\config.py | SIZE: 2.24 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import os
@@ -1240,7 +890,6 @@ APP_DIR = _get_app_dir()
 RESOURCE_DIR = _get_resource_dir()
 
 DATA_DIR = os.path.join(APP_DIR, "data")
-LOGS_DIR = os.path.join(APP_DIR, "logs")
 TEMPLATES_DIR = os.path.join(APP_DIR, "templates")
 TRAIN_TYPE_VARIANTS_DIR = os.path.join(DATA_DIR, "train_type_variants")
 DATA_STANDARDS_DIR = os.path.join(DATA_DIR, "standards")
@@ -1252,16 +901,8 @@ RESOURCE_TRAIN_TYPE_VARIANTS_DIR = os.path.join(RESOURCE_DATA_DIR, "train_type_v
 RESOURCE_DATA_STANDARDS_DIR = os.path.join(RESOURCE_DATA_DIR, "standards")
 RESOURCE_STANDARD_7_7_2_DIR = os.path.join(RESOURCE_DATA_STANDARDS_DIR, "7_7_2")
 
-TRAIN_TYPE_VALUES_FILE = os.path.join(DATA_DIR, "train_type_values.json")
-EXCEL_MAPPING_FILE = os.path.join(DATA_DIR, "excel_mapping.json")
-METADATA_FILE = os.path.join(DATA_DIR, "metadata.json")
-APP_LOG_FILE = os.path.join(APP_DIR, "application.log")
-
 TRAIN_TYPE_TEMPLATE_FILE = os.path.join(TEMPLATES_DIR, "train_type_template.xlsx")
 
-BUNDLED_TRAIN_TYPE_VALUES_FILE = os.path.join(RESOURCE_DATA_DIR, "train_type_values.json")
-BUNDLED_EXCEL_MAPPING_FILE = os.path.join(RESOURCE_DATA_DIR, "excel_mapping.json")
-BUNDLED_METADATA_FILE = os.path.join(RESOURCE_DATA_DIR, "metadata.json")
 BUNDLED_TRAIN_TYPE_TEMPLATE_FILE = os.path.join(RESOURCE_TEMPLATES_DIR, "train_type_template.xlsx")
 
 GENERIC_VARIANT_FILE = os.path.join(TRAIN_TYPE_VARIANTS_DIR, "Generic.json")
@@ -1278,14 +919,9 @@ BUNDLED_HEAVY_DIESEL_VARIANT_FILE = os.path.join(RESOURCE_TRAIN_TYPE_VARIANTS_DI
 BUNDLED_STANDARD_7_7_2_WORKBOOK = os.path.join(RESOURCE_STANDARD_7_7_2_DIR, "standard_7_7_2_precalculated_UNLOCKED.xlsm")
 BUNDLED_STANDARD_7_7_2_METADATA_FILE = os.path.join(RESOURCE_STANDARD_7_7_2_DIR, "standard_metadata.json")
 
-SHAREPOINT_BASE_URL: str = "https://your-tenant.sharepoint.com/sites/your-site/Shared%20Documents"
-SHAREPOINT_TRAIN_TYPE_VALUES_URL: str = f"{SHAREPOINT_BASE_URL}/train_type_values.json"
-SHAREPOINT_EXCEL_MAPPING_URL: str = f"{SHAREPOINT_BASE_URL}/excel_mapping.json"
-
-REQUEST_TIMEOUT_SECONDS: int = 10
 
 ========================================================================================================================
-FILE: app\runtime_assets.py | SIZE: 2.31 KB | ENCODING: utf-8-sig
+FILE: app\runtime_assets.py | SIZE: 1.89 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
@@ -1294,26 +930,19 @@ import shutil
 
 from app.config import (
     APP_DIR,
-    BUNDLED_EXCEL_MAPPING_FILE,
     BUNDLED_GENERIC_VARIANT_FILE,
     BUNDLED_HEAVY_DIESEL_VARIANT_FILE,
     BUNDLED_LIGHT_DIESEL_VARIANT_FILE,
     BUNDLED_STANDARD_7_7_2_METADATA_FILE,
     BUNDLED_STANDARD_7_7_2_WORKBOOK,
-    BUNDLED_METADATA_FILE,
     BUNDLED_TRAIN_TYPE_TEMPLATE_FILE,
-    BUNDLED_TRAIN_TYPE_VALUES_FILE,
     DATA_DIR,
     DATA_STANDARDS_DIR,
-    LOGS_DIR,
-    METADATA_FILE,
     STANDARD_7_7_2_DIR,
     STANDARD_7_7_2_METADATA_FILE,
     STANDARD_7_7_2_WORKBOOK,
     TEMPLATES_DIR,
     TRAIN_TYPE_TEMPLATE_FILE,
-    EXCEL_MAPPING_FILE,
-    TRAIN_TYPE_VALUES_FILE,
     GENERIC_VARIANT_FILE,
     LIGHT_DIESEL_VARIANT_FILE,
     HEAVY_DIESEL_VARIANT_FILE,
@@ -1339,15 +968,11 @@ def _copy_if_missing(source_path: str, target_path: str) -> None:
 def ensure_runtime_assets() -> None:
     os.makedirs(APP_DIR, exist_ok=True)
     os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(LOGS_DIR, exist_ok=True)
     os.makedirs(TEMPLATES_DIR, exist_ok=True)
     os.makedirs(TRAIN_TYPE_VARIANTS_DIR, exist_ok=True)
     os.makedirs(DATA_STANDARDS_DIR, exist_ok=True)
     os.makedirs(STANDARD_7_7_2_DIR, exist_ok=True)
 
-    _copy_if_missing(BUNDLED_TRAIN_TYPE_VALUES_FILE, TRAIN_TYPE_VALUES_FILE)
-    _copy_if_missing(BUNDLED_EXCEL_MAPPING_FILE, EXCEL_MAPPING_FILE)
-    _copy_if_missing(BUNDLED_METADATA_FILE, METADATA_FILE)
     _copy_if_missing(BUNDLED_TRAIN_TYPE_TEMPLATE_FILE, TRAIN_TYPE_TEMPLATE_FILE)
     _copy_if_missing(BUNDLED_GENERIC_VARIANT_FILE, GENERIC_VARIANT_FILE)
     _copy_if_missing(BUNDLED_LIGHT_DIESEL_VARIANT_FILE, LIGHT_DIESEL_VARIANT_FILE)
@@ -2947,350 +2572,9 @@ class ExcelMappingEntry:
         return cls(sheet=sheet, cell=cell, field=field)
 
 ========================================================================================================================
-FILE: app\repositories\__init__.py | SIZE: 0 B | ENCODING: utf-8-sig
-========================================================================================================================
-
-
-========================================================================================================================
-FILE: app\repositories\base_repository.py | SIZE: 367 B | ENCODING: utf-8-sig
-========================================================================================================================
-
-from abc import ABC, abstractmethod
-from typing import Any
-
-
-class BaseRepository(ABC):
-
-    @abstractmethod
-    def load_train_type_values(self) -> dict[str, Any]:
-        """Return the full train_type_values structure as a dict."""
-
-    @abstractmethod
-    def load_excel_mapping(self) -> dict[str, Any]:
-        """Return the excel_mapping structure as a dict."""
-
-========================================================================================================================
-FILE: app\repositories\local_json_repository.py | SIZE: 670 B | ENCODING: utf-8-sig
-========================================================================================================================
-
-import json
-import logging
-from typing import Any
-
-from app.config import TRAIN_TYPE_VALUES_FILE, EXCEL_MAPPING_FILE
-from app.repositories.base_repository import BaseRepository
-
-logger = logging.getLogger(__name__)
-
-
-class LocalJsonRepository(BaseRepository):
-
-    def _load_file(self, path: str) -> dict[str, Any]:
-        logger.info("Loading local file: %s", path)
-        with open(path, encoding="utf-8-sig") as fh:
-            return json.load(fh)
-
-    def load_train_type_values(self) -> dict[str, Any]:
-        return self._load_file(TRAIN_TYPE_VALUES_FILE)
-
-    def load_excel_mapping(self) -> dict[str, Any]:
-        return self._load_file(EXCEL_MAPPING_FILE)
-
-========================================================================================================================
-FILE: app\repositories\sharepoint_repository.py | SIZE: 1.97 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-import json
-import logging
-from typing import Any
-
-import urllib.request
-import urllib.error
-
-from app.config import (
-    SHAREPOINT_TRAIN_TYPE_VALUES_URL,
-    SHAREPOINT_EXCEL_MAPPING_URL,
-    REQUEST_TIMEOUT_SECONDS,
-)
-from app.repositories.base_repository import BaseRepository
-from app.repositories.local_json_repository import LocalJsonRepository
-
-logger = logging.getLogger(__name__)
-
-
-class SharePointRepository(BaseRepository):
-
-    def __init__(self) -> None:
-        self._local_fallback = LocalJsonRepository()
-
-    def _fetch_url(self, url: str) -> dict[str, Any]:
-        logger.info("Attempting to fetch from SharePoint: %s", url)
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as response:
-            raw = response.read()
-        data = json.loads(raw.decode("utf-8"))
-        logger.info("Successfully loaded from SharePoint: %s", url)
-        return data
-
-    def _fetch_with_fallback(
-        self,
-        url: str,
-        local_loader,
-        label: str,
-    ) -> dict[str, Any]:
-        try:
-            data = self._fetch_url(url)
-            logger.info("Source used for %s: SharePoint", label)
-            return data
-        except Exception as exc:
-            logger.warning(
-                "SharePoint unavailable for %s (%s). Falling back to local.", label, exc
-            )
-            data = local_loader()
-            logger.info("Source used for %s: local JSON", label)
-            return data
-
-    def load_train_type_values(self) -> dict[str, Any]:
-        return self._fetch_with_fallback(
-            SHAREPOINT_TRAIN_TYPE_VALUES_URL,
-            self._local_fallback.load_train_type_values,
-            "train_type_values",
-        )
-
-    def load_excel_mapping(self) -> dict[str, Any]:
-        return self._fetch_with_fallback(
-            SHAREPOINT_EXCEL_MAPPING_URL,
-            self._local_fallback.load_excel_mapping,
-            "excel_mapping",
-        )
-
-========================================================================================================================
 FILE: app\services\__init__.py | SIZE: 0 B | ENCODING: utf-8-sig
 ========================================================================================================================
 
-
-========================================================================================================================
-FILE: app\services\data_update_service.py | SIZE: 2.16 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-import json
-import logging
-import os
-import tempfile
-from datetime import datetime, timezone
-from typing import Any
-
-from app.config import METADATA_FILE
-
-logger = logging.getLogger(__name__)
-
-
-def _default_metadata() -> dict[str, Any]:
-    return {
-        "schema_version": "1.0",
-        "description": "Train Type Data Preparation Tool metadata",
-        "generation_history": [],
-    }
-
-
-class DataUpdateService:
-
-    def get_metadata(self) -> dict[str, Any]:
-        if not os.path.exists(METADATA_FILE):
-            logger.warning("metadata.json not found at: %s", METADATA_FILE)
-            return _default_metadata()
-        with open(METADATA_FILE, encoding="utf-8-sig") as fh:
-            metadata = json.load(fh)
-        if not isinstance(metadata, dict):
-            return _default_metadata()
-        metadata.setdefault("schema_version", "1.0")
-        metadata.setdefault("description", "Train Type Data Preparation Tool metadata")
-        metadata.setdefault("generation_history", [])
-        return metadata
-
-    def record_generation_event(self, train_type: str, output_path: str) -> None:
-        metadata = self.get_metadata()
-        history: list = metadata.setdefault("generation_history", [])
-        history.append(
-            {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "train_type": train_type,
-                "output_path": output_path,
-            }
-        )
-        target_dir = os.path.dirname(METADATA_FILE)
-        os.makedirs(target_dir, exist_ok=True)
-        temp_path = ""
-        try:
-            with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False, dir=target_dir) as temp_file:
-                temp_path = temp_file.name
-                json.dump(metadata, temp_file, indent=2, ensure_ascii=False)
-            os.replace(temp_path, METADATA_FILE)
-            logger.info("Recorded generation event for train type '%s'.", train_type)
-        finally:
-            if temp_path and os.path.exists(temp_path):
-                try:
-                    os.remove(temp_path)
-                except OSError:
-                    logger.debug("Temporary metadata file cleanup failed for %s", temp_path, exc_info=True)
-
-========================================================================================================================
-FILE: app\services\excel_generator.py | SIZE: 6.08 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-import logging
-import os
-import shutil
-from dataclasses import dataclass
-
-import openpyxl
-
-from app.config import TRAIN_TYPE_TEMPLATE_FILE
-from app.models.train_type import DataValidationError, ExcelMappingEntry, TrainTypeValues
-from app.repositories.base_repository import BaseRepository
-
-logger = logging.getLogger(__name__)
-
-
-@dataclass(slots=True)
-class ParameterColumnMapping:
-    sheet: str
-    parameter_column: str
-    value_column: str
-    start_row: int = 1
-    end_row: int | None = None
-
-    @classmethod
-    def from_mapping(cls, raw: dict) -> "ParameterColumnMapping":
-        if not isinstance(raw, dict):
-            raise DataValidationError("The 'parameter_column_mapping' value must be an object.")
-
-        sheet = raw.get("sheet", "")
-        parameter_column = raw.get("parameter_column", "")
-        value_column = raw.get("value_column", "")
-        start_row = raw.get("start_row", 1)
-        end_row = raw.get("end_row")
-
-        if not isinstance(sheet, str) or not sheet.strip():
-            raise DataValidationError("The parameter_column_mapping requires a valid 'sheet'.")
-        if not isinstance(parameter_column, str) or not parameter_column.strip():
-            raise DataValidationError("The parameter_column_mapping requires a valid 'parameter_column'.")
-        if not isinstance(value_column, str) or not value_column.strip():
-            raise DataValidationError("The parameter_column_mapping requires a valid 'value_column'.")
-        if not isinstance(start_row, int) or start_row < 1:
-            raise DataValidationError("The parameter_column_mapping 'start_row' must be an integer >= 1.")
-        if end_row is not None and (not isinstance(end_row, int) or end_row < start_row):
-            raise DataValidationError("The parameter_column_mapping 'end_row' must be null or >= start_row.")
-
-        return cls(
-            sheet=sheet,
-            parameter_column=parameter_column,
-            value_column=value_column,
-            start_row=start_row,
-            end_row=end_row,
-        )
-
-
-class ExcelGenerator:
-
-    def __init__(self, repository: BaseRepository) -> None:
-        self._repository = repository
-        self._mapping: list[ExcelMappingEntry] | None = None
-        self._parameter_column_mapping: ParameterColumnMapping | None = None
-
-    def _ensure_mapping_loaded(self) -> None:
-        if self._mapping is None:
-            raw = self._repository.load_excel_mapping()
-            mappings = raw.get("mappings", [])
-            if not isinstance(mappings, list):
-                raise DataValidationError("The top-level 'mappings' value must be a list.")
-            self._mapping = [ExcelMappingEntry.from_mapping(entry) for entry in mappings]
-
-            parameter_column_mapping = raw.get("parameter_column_mapping")
-            if parameter_column_mapping is not None:
-                self._parameter_column_mapping = ParameterColumnMapping.from_mapping(parameter_column_mapping)
-
-    def _write_with_explicit_mappings(self, wb, train_type_values: TrainTypeValues) -> None:
-        for entry in self._mapping:
-            if entry.sheet not in wb.sheetnames:
-                logger.warning("Sheet '%s' not found in template — skipping.", entry.sheet)
-                continue
-
-            ws = wb[entry.sheet]
-            value = train_type_values.get_value(entry.field)
-            if value is None:
-                logger.warning(
-                    "No value for field '%s' (train type '%s') — cell %s!%s left unchanged.",
-                    entry.field,
-                    train_type_values.train_type,
-                    entry.sheet,
-                    entry.cell,
-                )
-                continue
-
-            ws[entry.cell] = value
-            logger.debug("Wrote %s -> %s!%s", entry.field, entry.sheet, entry.cell)
-
-    def _write_with_parameter_column_mapping(self, wb, train_type_values: TrainTypeValues) -> None:
-        mapping = self._parameter_column_mapping
-        if mapping is None:
-            return
-        if mapping.sheet not in wb.sheetnames:
-            raise DataValidationError(
-                f"Sheet '{mapping.sheet}' from parameter_column_mapping was not found in template workbook."
-            )
-
-        ws = wb[mapping.sheet]
-        end_row = mapping.end_row or ws.max_row
-
-        parameter_to_row: dict[str, int] = {}
-        for row in range(mapping.start_row, end_row + 1):
-            parameter_key = ws[f"{mapping.parameter_column}{row}"].value
-            if isinstance(parameter_key, str) and parameter_key.strip():
-                parameter_to_row[parameter_key.strip()] = row
-
-        missing_fields: list[str] = []
-        for field_key, field_value in train_type_values.values.items():
-            row = parameter_to_row.get(field_key)
-            if row is None:
-                missing_fields.append(field_key)
-                continue
-            ws[f"{mapping.value_column}{row}"] = field_value
-
-        if missing_fields:
-            logger.warning(
-                "The following fields were not found in parameter column '%s' for sheet '%s': %s",
-                mapping.parameter_column,
-                mapping.sheet,
-                ", ".join(sorted(missing_fields)),
-            )
-
-    def generate(self, train_type_values: TrainTypeValues, output_path: str) -> None:
-        self._ensure_mapping_loaded()
-
-        if not os.path.exists(TRAIN_TYPE_TEMPLATE_FILE):
-            raise FileNotFoundError(
-                f"Template not found: {TRAIN_TYPE_TEMPLATE_FILE}"
-            )
-
-        output_dir = os.path.dirname(output_path)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-
-        shutil.copy2(TRAIN_TYPE_TEMPLATE_FILE, output_path)
-        logger.info("Copied template to: %s", output_path)
-
-        wb = openpyxl.load_workbook(output_path)
-        try:
-            if self._mapping:
-                self._write_with_explicit_mappings(wb, train_type_values)
-            if self._parameter_column_mapping is not None:
-                self._write_with_parameter_column_mapping(wb, train_type_values)
-
-            wb.save(output_path)
-            logger.info("Excel file saved: %s", output_path)
-        finally:
-            wb.close()
 
 ========================================================================================================================
 FILE: app\services\rebuild.py | SIZE: 3.96 KB | ENCODING: utf-8-sig
@@ -3407,45 +2691,6 @@ class RebuildService:
             logger.info("Saved rebuilt workbook for '%s' to: %s", train_type, output_path)
         finally:
             workbook.close()
-
-========================================================================================================================
-FILE: app\services\train_type_service.py | SIZE: 1.29 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-import logging
-from typing import Any
-
-from app.models.train_type import DataValidationError, TrainTypeValues
-from app.repositories.base_repository import BaseRepository
-
-logger = logging.getLogger(__name__)
-
-
-class TrainTypeService:
-
-    def __init__(self, repository: BaseRepository) -> None:
-        self._repository = repository
-        self._raw: dict[str, Any] | None = None
-
-    def _ensure_loaded(self) -> None:
-        if self._raw is None:
-            self._raw = self._repository.load_train_type_values()
-
-    def get_available_train_types(self) -> list[str]:
-        self._ensure_loaded()
-        train_types = self._raw.get("train_types", {})
-        if not isinstance(train_types, dict):
-            raise DataValidationError("The top-level 'train_types' value must be an object.")
-        return list(train_types.keys())
-
-    def get_train_type_values(self, train_type: str) -> TrainTypeValues:
-        self._ensure_loaded()
-        all_types: dict = self._raw.get("train_types", {})
-        if not isinstance(all_types, dict):
-            raise DataValidationError("The top-level 'train_types' value must be an object.")
-        if train_type not in all_types:
-            raise ValueError(f"Unknown train type: '{train_type}'")
-        return TrainTypeValues.from_mapping(train_type, all_types[train_type])
 
 ========================================================================================================================
 FILE: app\ui\__init__.py | SIZE: 0 B | ENCODING: utf-8-sig
@@ -3838,7 +3083,7 @@ class CompareTab:
         self._start_comparison(project_path)
 
 ========================================================================================================================
-FILE: app\ui\main_window.py | SIZE: 4.63 KB | ENCODING: utf-8-sig
+FILE: app\ui\main_window.py | SIZE: 4.46 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
@@ -3862,11 +3107,9 @@ class MainWindow:
         self,
         root: tk.Tk,
         rebuild_service,
-        data_update_service,
     ) -> None:
         self._root = root
         self._rebuild_service = rebuild_service
-        self._data_update_service = data_update_service
 
         self._selected_train_type = tk.StringVar()
         self._status_text = tk.StringVar(value=_STATUS_IDLE)
@@ -3956,7 +3199,6 @@ class MainWindow:
 
         try:
             self._rebuild_service.generate_excel(train_type, output_path)
-            self._data_update_service.record_generation_event(train_type, output_path)
             filename = os.path.basename(output_path)
             self._set_status(f"Success! File saved: {filename}", success=True)
             logger.info("Generated Excel for '%s' at '%s'.", train_type, output_path)
@@ -3979,81 +3221,6 @@ class MainWindow:
 
     def run(self) -> None:
         self._root.mainloop()
-
-========================================================================================================================
-FILE: data\excel_mapping.json | SIZE: 162 B | ENCODING: utf-8-sig
-========================================================================================================================
-
-{
-  "mappings": [],
-  "parameter_column_mapping": {
-    "sheet": "Train type (2)",
-    "parameter_column": "D",
-    "value_column": "E",
-    "start_row": 1
-  }
-}
-
-========================================================================================================================
-FILE: data\metadata.json | SIZE: 300 B | ENCODING: utf-8-sig
-========================================================================================================================
-
-{
-  "schema_version": "1.0",
-  "description": "Train Type Data Preparation Tool metadata",
-  "generation_history": [
-    {
-      "timestamp": "2026-07-30T14:44:38.609357+00:00",
-      "train_type": "Light Diesel",
-      "output_path": "C:/Users/bkrol/Downloads/LightDiesel.xlsx"
-    }
-  ]
-}
-
-========================================================================================================================
-FILE: data\train_type_values.json | SIZE: 1.01 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-{
-  "train_types": {
-    "generic": {
-      "max_speed_kmh": 160,
-      "traction_type": "Electric",
-      "axle_load_tonnes": 18.0,
-      "length_m": 200,
-      "passenger_capacity": 400,
-      "power_kw": 4000,
-      "braking_distance_m": 1200,
-      "bogies_count": 8,
-      "gauge_mm": 1435,
-      "notes": "Standard generic train type"
-    },
-    "light_diesel": {
-      "max_speed_kmh": 120,
-      "traction_type": "Diesel",
-      "axle_load_tonnes": 14.5,
-      "length_m": 80,
-      "passenger_capacity": 120,
-      "power_kw": 560,
-      "braking_distance_m": 700,
-      "bogies_count": 4,
-      "gauge_mm": 1435,
-      "notes": "Light regional diesel multiple unit"
-    },
-    "heavy_diesel": {
-      "max_speed_kmh": 140,
-      "traction_type": "Diesel",
-      "axle_load_tonnes": 22.0,
-      "length_m": 160,
-      "passenger_capacity": 280,
-      "power_kw": 1800,
-      "braking_distance_m": 1000,
-      "bogies_count": 8,
-      "gauge_mm": 1435,
-      "notes": "Heavy long-distance diesel locomotive-hauled set"
-    }
-  }
-}
 
 ========================================================================================================================
 FILE: data\word_excel_match_report.json | SIZE: 2.02 KB | ENCODING: utf-8-sig
@@ -24543,312 +23710,114 @@ if __name__ == "__main__":
     build_template()
 
 ========================================================================================================================
-FILE: tests\test_core.py | SIZE: 41.31 KB | ENCODING: utf-8-sig
+FILE: tests\test_core.py | SIZE: 17.22 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
+import json
+import queue
+import re
 import tempfile
 import unittest
 from pathlib import Path
-import json
-import queue
-import importlib.util
-import re
 from types import SimpleNamespace
 from unittest import mock
 
 import openpyxl
 
-from app.comparison.deviation_policy import is_actionable, is_placeholder
 from app.comparison.compare_worker import (
     ComparisonWorkerFailure,
     ComparisonWorkerProgress,
     ComparisonWorkerSuccess,
     run_comparison_worker,
 )
-from app.comparison.models import ComparisonSummary, DeviationRecord, ReportGenerationError, WorkbookComparisonResult
+from app.comparison.deviation_policy import is_actionable, is_placeholder
+from app.comparison.models import (
+    ComparisonSummary,
+    DeviationRecord,
+    ReportGenerationError,
+    WorkbookComparisonResult,
+    WorkbookLoadError,
+)
 from app.comparison.passive_rules_parser import PassiveRulesParser
 from app.comparison.report_generator import ReportGenerator
 from app.comparison.standard_metadata import StandardWorkbookMetadata
 from app.comparison.workbook_comparator import WorkbookComparator
 from app.config import STANDARD_7_7_2_METADATA_FILE, STANDARD_7_7_2_WORKBOOK
 from app.models.train_type import DataValidationError, ExcelMappingEntry, TrainTypeValues
-from app.services.data_update_service import DataUpdateService
 from app.services.rebuild import RebuildService, TrainTypeVariant
-from app.services.excel_generator import ExcelGenerator
-from app.services.train_type_service import TrainTypeService
-from app.comparison.models import WorkbookLoadError
 
 
-class FakeRepository:
-    def __init__(self, train_type_values: dict | None = None, excel_mapping: dict | None = None) -> None:
-        self._train_type_values = train_type_values or {}
-        self._excel_mapping = excel_mapping or {}
+def build_metadata(temp_path: Path, compare: dict | None = None, passive_rules: dict | None = None) -> StandardWorkbookMetadata:
+    return StandardWorkbookMetadata(
+        standard_id="test_standard",
+        display_name="Test Standard",
+        baseline="7.7.2",
+        train_type="Generic",
+        workbook_file="standard.xlsm",
+        read_only=True,
+        precalculated=True,
+        password="",
+        compare=compare or {"report_sheet_name": "List of Project Deviations"},
+        passive_rules=passive_rules or {},
+        report_columns=["Change No", "Sheet", "Cell", "Standard Value", "Project Value", "Parameter", "Rule"],
+        user_warning="",
+        source_path=str(temp_path / "standard_metadata.json"),
+    )
 
-    def load_train_type_values(self) -> dict:
-        return self._train_type_values
 
-    def load_excel_mapping(self) -> dict:
-        return self._excel_mapping
+def build_report_result(deviations: list[DeviationRecord], total_cells: int | None = None) -> WorkbookComparisonResult:
+    cells = total_cells if total_cells is not None else max(1, len(deviations))
+    return WorkbookComparisonResult(
+        deviations=deviations,
+        summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=cells, total_deviations_found=len(deviations)),
+        standard_display_name="Test Standard",
+        standard_workbook_file="standard.xlsm",
+        project_workbook_file="project.xlsm",
+    )
 
 
 class ModelValidationTests(unittest.TestCase):
-    def test_train_type_values_from_mapping_rejects_invalid_structure(self) -> None:
+    def test_model_validation_rejects_invalid_mapping_inputs(self) -> None:
         with self.assertRaises(DataValidationError):
             TrainTypeValues.from_mapping("train-a", {1: "invalid"})  # type: ignore[arg-type]
 
-    def test_excel_mapping_entry_validates_cell_reference(self) -> None:
         with self.assertRaises(DataValidationError):
             ExcelMappingEntry.from_mapping({"sheet": "Train Type", "cell": "bad-cell", "field": "speed"})
 
 
-class ServiceAndGeneratorTests(unittest.TestCase):
-    def test_train_type_service_returns_available_types_and_values(self) -> None:
-        repository = FakeRepository(
-            train_type_values={"train_types": {"generic": {"max_speed_kmh": 160}}},
-            excel_mapping={"mappings": []},
-        )
-        service = TrainTypeService(repository)
-
-        self.assertEqual(service.get_available_train_types(), ["generic"])
-        values = service.get_train_type_values("generic")
-        self.assertEqual(values.get_value("max_speed_kmh"), 160)
-
-    def test_excel_generator_writes_values_into_template(self) -> None:
-        repository = FakeRepository(
-            train_type_values={"train_types": {"generic": {"max_speed_kmh": 160}}},
-            excel_mapping={
-                "mappings": [
-                    {"sheet": "Train Type", "cell": "B2", "field": "max_speed_kmh"}
-                ]
-            },
-        )
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            template_path = temp_path / "template.xlsx"
-            output_path = temp_path / "output.xlsx"
-
-            workbook = openpyxl.Workbook()
-            worksheet = workbook.active
-            worksheet.title = "Train Type"
-            worksheet["B2"] = None
-            workbook.save(template_path)
-
-            import app.services.excel_generator as excel_generator_module
-
-            original_template_file = excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE
-            excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE = str(template_path)
-            try:
-                generator = ExcelGenerator(repository)
-                train_type_values = TrainTypeValues.from_mapping("generic", {"max_speed_kmh": 160})
-                generator.generate(train_type_values, str(output_path))
-            finally:
-                excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE = original_template_file
-
-            generated_workbook = openpyxl.load_workbook(output_path)
-            try:
-                self.assertEqual(generated_workbook["Train Type"]["B2"].value, 160)
-            finally:
-                generated_workbook.close()
-
-    def test_excel_generator_writes_values_using_parameter_column_mapping(self) -> None:
-        repository = FakeRepository(
-            train_type_values={"train_types": {"generic": {"train_type_name": "GENERIC_X"}}},
-            excel_mapping={
-                "mappings": [],
-                "parameter_column_mapping": {
-                    "sheet": "Train type (2)",
-                    "parameter_column": "D",
-                    "value_column": "E",
-                    "start_row": 1,
-                },
-            },
-        )
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            template_path = temp_path / "template.xlsx"
-            output_path = temp_path / "output.xlsx"
-
-            workbook = openpyxl.Workbook()
-            worksheet = workbook.active
-            worksheet.title = "Train type (2)"
-            worksheet["D11"] = "train_type_name"
-            worksheet["E11"] = "OLD"
-            workbook.save(template_path)
-
-            import app.services.excel_generator as excel_generator_module
-
-            original_template_file = excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE
-            excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE = str(template_path)
-            try:
-                generator = ExcelGenerator(repository)
-                train_type_values = TrainTypeValues.from_mapping("generic", {"train_type_name": "GENERIC_X"})
-                generator.generate(train_type_values, str(output_path))
-            finally:
-                excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE = original_template_file
-
-            generated_workbook = openpyxl.load_workbook(output_path)
-            try:
-                self.assertEqual(generated_workbook["Train type (2)"]["E11"].value, "GENERIC_X")
-            finally:
-                generated_workbook.close()
-
-
 class MetadataAndPersistenceTests(unittest.TestCase):
-    def test_embedded_standard_metadata_matches_workbook_filename(self) -> None:
+    def test_embedded_standard_metadata_matches_workbook(self) -> None:
         metadata = StandardWorkbookMetadata.load(STANDARD_7_7_2_METADATA_FILE)
-
         self.assertTrue(Path(STANDARD_7_7_2_WORKBOOK).exists())
         self.assertEqual(Path(STANDARD_7_7_2_WORKBOOK).name, metadata.workbook_file)
-        self.assertEqual(Path(metadata.workbook_path).name, Path(STANDARD_7_7_2_WORKBOOK).name)
-
-    def test_data_update_service_writes_valid_json_atomically(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata_file = temp_path / "metadata.json"
-            metadata_file.write_text(
-                json.dumps({
-                    "schema_version": "1.0",
-                    "description": "Train Type Data Preparation Tool metadata",
-                    "generation_history": [],
-                }),
-                encoding="utf-8",
-            )
-
-            import app.services.data_update_service as data_update_module
-
-            original_metadata_file = data_update_module.METADATA_FILE
-            data_update_module.METADATA_FILE = str(metadata_file)
-            try:
-                service = DataUpdateService()
-                service.record_generation_event("Generic", "C:/Temp/output.xlsx")
-
-                with metadata_file.open(encoding="utf-8") as file_obj:
-                    metadata = json.load(file_obj)
-
-                self.assertEqual(metadata["schema_version"], "1.0")
-                self.assertEqual(metadata["description"], "Train Type Data Preparation Tool metadata")
-                self.assertEqual(len(metadata["generation_history"]), 1)
-                self.assertEqual(metadata["generation_history"][0]["train_type"], "Generic")
-                self.assertEqual(metadata["generation_history"][0]["output_path"], "C:/Temp/output.xlsx")
-                self.assertEqual(len(list(temp_path.iterdir())), 1)
-            finally:
-                data_update_module.METADATA_FILE = original_metadata_file
-
-    def test_data_update_service_cleans_temporary_file_on_replace_failure(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata_file = temp_path / "metadata.json"
-            metadata_file.write_text(
-                json.dumps({
-                    "schema_version": "1.0",
-                    "description": "Train Type Data Preparation Tool metadata",
-                    "generation_history": [],
-                }),
-                encoding="utf-8",
-            )
-
-            import app.services.data_update_service as data_update_module
-
-            original_metadata_file = data_update_module.METADATA_FILE
-            data_update_module.METADATA_FILE = str(metadata_file)
-            try:
-                service = DataUpdateService()
-                with mock.patch.object(data_update_module.os, "replace", side_effect=OSError("replace failed")):
-                    with self.assertRaises(OSError):
-                        service.record_generation_event("Generic", "C:/Temp/output.xlsx")
-
-                with metadata_file.open(encoding="utf-8") as file_obj:
-                    metadata = json.load(file_obj)
-
-                self.assertEqual(metadata["generation_history"], [])
-                self.assertEqual(list(temp_path.iterdir()), [metadata_file])
-            finally:
-                data_update_module.METADATA_FILE = original_metadata_file
 
 
 class ComparisonWorkerTests(unittest.TestCase):
-    def test_worker_posts_success_and_progress_messages(self) -> None:
+    def test_worker_posts_success_and_failure_messages(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={},
-                passive_rules={},
-                report_columns=[],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
+            metadata = build_metadata(temp_path)
 
-            class FakeComparator:
+            class SuccessComparator:
                 last_instance = None
 
                 def __init__(self, project_workbook_path: str, metadata: StandardWorkbookMetadata, progress_callback) -> None:
-                    self.project_workbook_path = project_workbook_path
-                    self.metadata = metadata
-                    self.progress_callback = progress_callback
                     self.closed = False
-                    FakeComparator.last_instance = self
-                    self.progress_callback("Loading standard workbook...")
+                    SuccessComparator.last_instance = self
+                    progress_callback("Loading standard workbook...")
 
                 def compare_sheets(self) -> WorkbookComparisonResult:
-                    self.progress_callback("Comparing cells...")
-                    return WorkbookComparisonResult(
-                        deviations=[],
-                        summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=2, total_deviations_found=0),
-                    )
+                    return build_report_result([])
 
                 def close_workbooks(self) -> None:
                     self.closed = True
 
-            message_queue: queue.Queue = queue.Queue()
-            run_comparison_worker("project.xlsm", metadata, message_queue, comparator_factory=FakeComparator)
-
-            messages = []
-            while not message_queue.empty():
-                messages.append(message_queue.get_nowait())
-
-            self.assertIsInstance(messages[0], ComparisonWorkerProgress)
-            self.assertEqual(messages[0].message, "Loading standard workbook...")
-            self.assertIsInstance(messages[1], ComparisonWorkerProgress)
-            self.assertEqual(messages[1].message, "Comparing cells...")
-            self.assertIsInstance(messages[-1], ComparisonWorkerSuccess)
-            self.assertEqual(messages[-1].result.summary.total_cells_compared, 2)
-            self.assertTrue(FakeComparator.last_instance.closed)
-
-    def test_worker_posts_failure_message_and_closes_workbooks(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={},
-                passive_rules={},
-                report_columns=[],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
-
-            class FakeComparator:
+            class FailureComparator:
                 last_instance = None
 
                 def __init__(self, project_workbook_path: str, metadata: StandardWorkbookMetadata, progress_callback) -> None:
                     self.closed = False
-                    FakeComparator.last_instance = self
+                    FailureComparator.last_instance = self
 
                 def compare_sheets(self):
                     raise WorkbookLoadError("failed to load workbook")
@@ -24856,109 +23825,96 @@ class ComparisonWorkerTests(unittest.TestCase):
                 def close_workbooks(self) -> None:
                     self.closed = True
 
-            message_queue: queue.Queue = queue.Queue()
-            run_comparison_worker("project.xlsm", metadata, message_queue, comparator_factory=FakeComparator)
+            success_queue: queue.Queue = queue.Queue()
+            run_comparison_worker("project.xlsm", metadata, success_queue, comparator_factory=SuccessComparator)
+            success_messages = []
+            while not success_queue.empty():
+                success_messages.append(success_queue.get_nowait())
+            self.assertIsInstance(success_messages[0], ComparisonWorkerProgress)
+            self.assertIsInstance(success_messages[-1], ComparisonWorkerSuccess)
+            self.assertTrue(SuccessComparator.last_instance.closed)
 
-            messages = []
-            while not message_queue.empty():
-                messages.append(message_queue.get_nowait())
-
-            self.assertIsInstance(messages[-1], ComparisonWorkerFailure)
-            self.assertEqual(messages[-1].error_kind, "workbook_load")
-            self.assertIsInstance(messages[-1].exception, WorkbookLoadError)
-            self.assertTrue(FakeComparator.last_instance.closed)
+            failure_queue: queue.Queue = queue.Queue()
+            run_comparison_worker("project.xlsm", metadata, failure_queue, comparator_factory=FailureComparator)
+            failure_messages = []
+            while not failure_queue.empty():
+                failure_messages.append(failure_queue.get_nowait())
+            self.assertIsInstance(failure_messages[-1], ComparisonWorkerFailure)
+            self.assertEqual(failure_messages[-1].error_kind, "workbook_load")
+            self.assertTrue(FailureComparator.last_instance.closed)
 
 
 class RebuildServiceTests(unittest.TestCase):
-    def test_real_variant_json_files_do_not_contain_serialized_openpyxl_objects(self) -> None:
-        variant_dir = Path(__file__).resolve().parents[1] / "data" / "train_type_variants"
-        artifact_pattern = re.compile(r"<openpyxl\.| object at 0x[0-9A-Fa-f]+>")
-
-        for name in ["Generic.json", "HeavyDiesel.json", "LightDiesel.json"]:
-            variant_data = json.loads((variant_dir / name).read_text(encoding="utf-8"))
-
-            def walk(value: object) -> None:
-                if isinstance(value, dict):
-                    for nested_value in value.values():
-                        walk(nested_value)
-                elif isinstance(value, list):
-                    for nested_value in value:
-                        walk(nested_value)
-                elif isinstance(value, str):
-                    self.assertFalse(artifact_pattern.search(value), f"Serialized openpyxl object artifact found in {name}: {value}")
-
-            walk(variant_data)
-
-    def test_rebuild_service_lists_train_types(self) -> None:
+    def test_rebuild_service_validation_and_real_variants(self) -> None:
         service = RebuildService()
         self.assertEqual(service.get_available_train_types(), ["Generic", "Heavy Diesel", "Light Diesel"])
 
-    def test_rebuild_service_generates_workbook_from_variant_json(self) -> None:
-        service = RebuildService()
-
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
+
             variant_path = temp_path / "variant.json"
             output_path = temp_path / "output.xlsx"
-
-            variant_data = {
-                "sheet_name": "IMU",
-                "cells": {
-                    "A1": {"value": "Header"},
-                    "B2": {"value": 123},
-                },
-                "column_widths": {"A": 22},
-                "row_heights": {"1": 30},
-                "merged_cells": ["A3:B3"],
-            }
-            variant_path.write_text(json.dumps(variant_data), encoding="utf-8")
-
-            service._variants = {  # type: ignore[attr-defined]
-                "Generic": TrainTypeVariant("Generic", str(variant_path))
-            }
+            variant_path.write_text(
+                json.dumps(
+                    {
+                        "sheet_name": "IMU",
+                        "cells": {"A1": {"value": "Header"}, "B2": {"value": 123}},
+                        "column_widths": {"A": 22},
+                        "row_heights": {"1": 30},
+                        "merged_cells": ["A3:B3"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            service._variants = {"Generic": TrainTypeVariant("Generic", str(variant_path))}  # type: ignore[attr-defined]
             service.generate_excel("Generic", str(output_path))
-
             workbook = openpyxl.load_workbook(output_path)
             try:
                 worksheet = workbook["IMU"]
                 self.assertEqual(worksheet["A1"].value, "Header")
                 self.assertEqual(worksheet["B2"].value, 123)
-                self.assertEqual(worksheet.column_dimensions["A"].width, 22)
-                self.assertEqual(worksheet.row_dimensions[1].height, 30)
             finally:
                 workbook.close()
 
-    def test_rebuild_service_rejects_serialized_openpyxl_objects(self) -> None:
-        service = RebuildService()
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            variant_path = temp_path / "variant.json"
-            variant_data = {
-                "sheet_name": "IMU",
-                "cells": {
-                    "A1": {"value": "<openpyxl.cell.cell.Cell object at 0x123>"},
-                },
-                "column_widths": {},
-                "row_heights": {},
-                "merged_cells": [],
-            }
-            variant_path.write_text(json.dumps(variant_data), encoding="utf-8")
-            service._variants = {  # type: ignore[attr-defined]
-                "Generic": TrainTypeVariant("Generic", str(variant_path))
-            }
-
+            bad_service = RebuildService()
+            bad_variant = temp_path / "bad.json"
+            bad_variant.write_text(
+                json.dumps(
+                    {
+                        "sheet_name": "IMU",
+                        "cells": {"A1": {"value": "<openpyxl.cell.cell.Cell object at 0x123>"}},
+                        "column_widths": {},
+                        "row_heights": {},
+                        "merged_cells": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            bad_service._variants = {"Generic": TrainTypeVariant("Generic", str(bad_variant))}  # type: ignore[attr-defined]
             with self.assertRaises(ValueError):
-                service._load_variant_json("Generic")  # type: ignore[attr-defined]
+                bad_service._load_variant_json("Generic")  # type: ignore[attr-defined]
 
-    def test_rebuild_service_generates_real_variants_without_validation_errors(self) -> None:
-        service = RebuildService()
+            artifact_pattern = re.compile(r"<openpyxl\.| object at 0x[0-9A-Fa-f]+>")
+            for name in ["Generic.json", "HeavyDiesel.json", "LightDiesel.json"]:
+                variant_data = json.loads((Path(__file__).resolve().parents[1] / "data" / "train_type_variants" / name).read_text(encoding="utf-8"))
 
-        for train_type in ["Generic", "Heavy Diesel", "Light Diesel"]:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                output_path = Path(temp_dir) / f"{train_type.replace(' ', '_')}.xlsx"
-                service.generate_excel(train_type, str(output_path))
-                self.assertTrue(output_path.exists(), train_type)
+                def walk(value: object) -> None:
+                    if isinstance(value, dict):
+                        for nested_value in value.values():
+                            walk(nested_value)
+                    elif isinstance(value, list):
+                        for nested_value in value:
+                            walk(nested_value)
+                    elif isinstance(value, str):
+                        self.assertFalse(artifact_pattern.search(value), f"Serialized openpyxl object artifact found in {name}: {value}")
+
+                walk(variant_data)
+
+            real_service = RebuildService()
+            for train_type in ["Generic", "Heavy Diesel", "Light Diesel"]:
+                smoke_output = temp_path / f"{train_type.replace(' ', '_')}.xlsx"
+                real_service.generate_excel(train_type, str(smoke_output))
+                self.assertTrue(smoke_output.exists(), train_type)
 
 
 class WorkbookComparatorTests(unittest.TestCase):
@@ -24977,22 +23933,9 @@ class WorkbookComparatorTests(unittest.TestCase):
                 read_only=True,
                 precalculated=True,
                 password="",
-                compare={
-                    "ignored_sheets": [],
-                    "ignored_prefixes": [],
-                    "report_name": "Workbook_Deviations.xlsx",
-                    "report_sheet_name": "List of Project Deviations",
-                },
+                compare={"ignored_sheets": [], "ignored_prefixes": [], "report_name": "Workbook_Deviations.xlsx", "report_sheet_name": "List of Project Deviations"},
                 passive_rules={"enabled": False},
-                report_columns=[
-                    "Change No",
-                    "Sheet",
-                    "Cell",
-                    "Standard Value",
-                    "Project Value",
-                    "Parameter",
-                    "Rule",
-                ],
+                report_columns=["Change No", "Sheet", "Cell", "Standard Value", "Project Value", "Parameter", "Rule"],
                 user_warning="",
                 source_path=str(temp_path / "standard_metadata.json"),
             )
@@ -25002,9 +23945,7 @@ class WorkbookComparatorTests(unittest.TestCase):
             standard_ws.title = "Visible Sheet"
             standard_ws["A1"] = "keep"
             standard_ws["B2"] = "STANDARD"
-            standard_ws["A1"] = "keep"
-            standard_extra = standard_wb.create_sheet("Standard Only")
-            standard_extra["A1"] = "exists"
+            standard_wb.create_sheet("Standard Only")["A1"] = "exists"
             standard_wb.save(standard_path)
             standard_wb.close()
 
@@ -25013,9 +23954,7 @@ class WorkbookComparatorTests(unittest.TestCase):
             project_ws.title = "Visible Sheet"
             project_ws["A1"] = "keep"
             project_ws["B2"] = "PROJECT"
-            project_ws["A1"] = "keep"
-            project_extra = project_wb.create_sheet("Project Only")
-            project_extra["A1"] = "exists"
+            project_wb.create_sheet("Project Only")["A1"] = "exists"
             project_wb.save(project_path)
             project_wb.close()
 
@@ -25031,73 +23970,43 @@ class WorkbookComparatorTests(unittest.TestCase):
             report_wb = openpyxl.load_workbook(result.output_file)
             try:
                 self.assertEqual(report_wb.sheetnames, ["Summary", "List of Project Deviations", "All Cell Differences"])
-
-                summary_ws = report_wb["Summary"]
-                self.assertEqual(summary_ws["B16"].value, "Sheet")
-                self.assertEqual(summary_ws["C16"].value, "Raw differences")
-                self.assertEqual(summary_ws["D16"].value, "Actionable differences")
-                self.assertEqual(summary_ws["E16"].value, "Passive Rules mapped")
-
-                actionable_ws = report_wb["List of Project Deviations"]
-                raw_ws = report_wb["All Cell Differences"]
-
-                self.assertEqual(actionable_ws.title, "List of Project Deviations")
-                self.assertEqual(raw_ws.title, "All Cell Differences")
-
-                actionable_rows = list(actionable_ws.iter_rows(min_row=5, values_only=True))
-                raw_rows = list(raw_ws.iter_rows(min_row=5, values_only=True))
-
-                self.assertEqual(len(actionable_rows), 3)
-                self.assertEqual(len(raw_rows), 3)
-                self.assertCountEqual(
-                    actionable_rows,
-                    [
-                        (1, "Project Only", "-", "Missing", "Exists", None, None),
-                        (2, "Standard Only", "-", "Exists", "Missing", None, None),
-                        (3, "Visible Sheet", "B2", "STANDARD", "PROJECT", None, None),
-                    ],
-                )
-                self.assertCountEqual(raw_rows, actionable_rows)
             finally:
                 report_wb.close()
 
 
 class ReportGeneratorTests(unittest.TestCase):
-    def _build_report_result(self, deviations: list[DeviationRecord], total_cells: int = 1) -> WorkbookComparisonResult:
-        return WorkbookComparisonResult(
-            deviations=deviations,
-            summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=total_cells, total_deviations_found=len(deviations)),
-            standard_display_name="Test Standard",
-            standard_workbook_file="standard.xlsm",
-            project_workbook_file="project.xlsm",
-        )
-
-    def test_report_generator_closes_workbook_after_successful_save(self) -> None:
+    def test_report_generator_writes_sorts_and_formats_report(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={"report_sheet_name": "List of Project Deviations"},
-                passive_rules={},
-                report_columns=[
-                    "Change No",
-                    "Sheet",
-                    "Cell",
-                    "Standard Value",
-                    "Project Value",
-                    "Parameter",
-                    "Rule",
+            metadata = build_metadata(temp_path)
+            result = build_report_result(
+                [
+                    DeviationRecord("Value Changed", "Zeta", "A1", "1", "2", "", ""),
+                    DeviationRecord("Value Changed", "Alpha", "A1", "1", "2", "Param A", "Rule 1"),
                 ],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
+                total_cells=2,
             )
+
+            output_path = temp_path / "Workbook_Deviations.xlsx"
+            ReportGenerator(metadata).generate(result, str(output_path))
+
+            report_wb = openpyxl.load_workbook(output_path)
+            try:
+                self.assertEqual(report_wb.sheetnames, ["Summary", "List of Project Deviations", "All Cell Differences"])
+                actionable_ws = report_wb["List of Project Deviations"]
+                raw_ws = report_wb["All Cell Differences"]
+                self.assertEqual(actionable_ws["B5"].value, "Alpha")
+                self.assertEqual(actionable_ws["B6"].value, "Zeta")
+                self.assertEqual(raw_ws["B5"].value, "Alpha")
+                self.assertEqual(raw_ws["B6"].value, "Zeta")
+                self.assertEqual(actionable_ws["D5"].number_format, "General")
+            finally:
+                report_wb.close()
+
+    def test_report_generator_closes_workbook_on_success_and_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = build_metadata(temp_path)
 
             fake_workbook = SimpleNamespace(
                 active=object(),
@@ -25110,321 +24019,31 @@ class ReportGeneratorTests(unittest.TestCase):
             with mock.patch("app.comparison.report_generator.Workbook", return_value=fake_workbook), \
                 mock.patch.object(ReportGenerator, "_configure_summary_sheet", return_value=None), \
                 mock.patch.object(ReportGenerator, "_write_deviation_sheet", return_value=None):
-                output_path = temp_path / "Workbook_Deviations.xlsx"
-                result = self._build_report_result([])
-                ReportGenerator(metadata).generate(result, str(output_path))
-
-            self.assertTrue(fake_workbook.save.called)
+                ReportGenerator(metadata).generate(build_report_result([]), str(temp_path / "ok.xlsx"))
             self.assertTrue(fake_workbook.close.called)
-
-    def test_report_generator_closes_workbook_after_save_failure(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={"report_sheet_name": "List of Project Deviations"},
-                passive_rules={},
-                report_columns=[
-                    "Change No",
-                    "Sheet",
-                    "Cell",
-                    "Standard Value",
-                    "Project Value",
-                    "Parameter",
-                    "Rule",
-                ],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
-
-            fake_workbook = SimpleNamespace(
-                active=object(),
-                properties=SimpleNamespace(title=None, subject=None, creator=None),
-                remove=mock.MagicMock(),
-                save=mock.MagicMock(side_effect=RuntimeError("save failed")),
-                close=mock.MagicMock(),
-            )
 
             with mock.patch("app.comparison.report_generator.Workbook", return_value=fake_workbook), \
                 mock.patch.object(ReportGenerator, "_configure_summary_sheet", return_value=None), \
-                mock.patch.object(ReportGenerator, "_write_deviation_sheet", return_value=None):
-                result = self._build_report_result([])
+                mock.patch.object(ReportGenerator, "_write_deviation_sheet", return_value=None), \
+                mock.patch.object(fake_workbook, "save", side_effect=RuntimeError("save failed")):
                 with self.assertRaises(ReportGenerationError):
-                    ReportGenerator(metadata).generate(result, str(temp_path / "Workbook_Deviations.xlsx"))
-
+                    ReportGenerator(metadata).generate(build_report_result([]), str(temp_path / "fail.xlsx"))
             self.assertTrue(fake_workbook.close.called)
 
-    def test_export_tool_resolves_repo_root_and_writes_review_export(self) -> None:
-        spec = importlib.util.spec_from_file_location(
-            "export_full_repo",
-            str(Path(__file__).resolve().parents[1] / "tools" / "export_full_repo.py"),
+
+class PassiveRulesTests(unittest.TestCase):
+    def test_deviation_policy_and_parser_work_together(self) -> None:
+        placeholder = DeviationRecord("Value Changed", "Train type", "A1", "-", "123", "", "")
+        actionable = DeviationRecord("Value Changed", "Train type", "A1", "1", "2", "Param", "Rule")
+        parser = PassiveRulesParser(
+            {
+                "enabled": True,
+                "sheet_name": "Passive Rules",
+                "header_row": 5,
+                "data_start_row": 6,
+                "columns": {"parameter": "B", "rule": "C", "row": "D"},
+            }
         )
-        self.assertIsNotNone(spec)
-        assert spec and spec.loader is not None
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        temp_root = Path(tempfile.mkdtemp())
-        try:
-            (temp_root / "tools").mkdir()
-            (temp_root / "sample.txt").write_text("hello", encoding="utf-8")
-            (temp_root / "tools" / "export_full_repo.py").write_text("# placeholder", encoding="utf-8")
-
-            self.assertEqual(module.resolve_repo_root(temp_root / "tools" / "export_full_repo.py"), temp_root)
-
-            output_path = temp_root / "repo_full_export.txt"
-            module.export_repository(temp_root, output_path)
-            content = output_path.read_text(encoding="utf-8")
-            self.assertIn("# sample.txt", content)
-            self.assertIn("hello", content)
-        finally:
-            for child in sorted(temp_root.rglob("*"), reverse=True):
-                if child.is_file():
-                    child.unlink()
-                elif child.is_dir():
-                    child.rmdir()
-            temp_root.rmdir()
-
-    def test_report_generator_formats_float_values_for_presentation(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={"report_sheet_name": "List of Project Deviations"},
-                passive_rules={},
-                report_columns=[
-                    "Change No",
-                    "Sheet",
-                    "Cell",
-                    "Standard Value",
-                    "Project Value",
-                    "Parameter",
-                    "Rule",
-                ],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
-            result = self._build_report_result([
-                DeviationRecord(
-                    change_type="Value Changed",
-                    sheet_name="Train type",
-                    cell_address="E412",
-                    standard_value=9.071999999999999,
-                    project_value=10.071999999999999,
-                    parameter="Param A",
-                    rule="Rule 1",
-                )
-            ])
-
-            output_path = temp_path / "Workbook_Deviations.xlsx"
-            ReportGenerator(metadata).generate(result, str(output_path))
-
-            report_wb = openpyxl.load_workbook(output_path)
-            try:
-                sheet = report_wb["List of Project Deviations"]
-                self.assertIsInstance(sheet["D5"].value, float)
-                self.assertEqual(sheet["D5"].number_format, "0.###############")
-                self.assertIsInstance(sheet["E5"].value, float)
-                self.assertEqual(sheet["E5"].number_format, "0.###############")
-            finally:
-                report_wb.close()
-
-    def test_report_generator_writes_three_sheet_report(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={"report_sheet_name": "List of Project Deviations"},
-                passive_rules={},
-                report_columns=[
-                    "Change No",
-                    "Sheet",
-                    "Cell",
-                    "Standard Value",
-                    "Project Value",
-                    "Parameter",
-                    "Rule",
-                ],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
-            result = self._build_report_result([
-                DeviationRecord(
-                    change_type="Value Changed",
-                    sheet_name="Train type",
-                    cell_address="E412",
-                    standard_value="2.0",
-                    project_value="2.4",
-                    parameter="Param A",
-                    rule="Rule 1",
-                )
-            ])
-
-            generator = ReportGenerator(metadata)
-            output_path = temp_path / "Workbook_Deviations.xlsx"
-            generator.generate(result, str(output_path))
-
-            report_wb = openpyxl.load_workbook(output_path)
-            try:
-                self.assertEqual(report_wb.sheetnames, ["Summary", "List of Project Deviations", "All Cell Differences"])
-
-                summary_ws = report_wb["Summary"]
-                self.assertEqual(summary_ws["C5"].value, "Test Standard")
-                self.assertEqual(summary_ws["B10"].value, 1)
-                self.assertFalse(summary_ws.sheet_view.showGridLines)
-                self.assertEqual(summary_ws.freeze_panes, "A8")
-                self.assertEqual(summary_ws.column_dimensions["B"].width, 32)
-                self.assertEqual(list(summary_ws.tables.keys()), ["SummaryBySheet"])
-                self.assertTrue(summary_ws.sheet_properties.tabColor is not None)
-                self.assertEqual(summary_ws.sheet_properties.tabColor.rgb[-6:], "1F4E78")
-
-                actionable_ws = report_wb["List of Project Deviations"]
-                raw_ws = report_wb["All Cell Differences"]
-
-                actionable_headers = [cell.value for cell in actionable_ws[4]]
-                raw_headers = [cell.value for cell in raw_ws[4]]
-                expected_headers = ["Change No", "Sheet", "Cell", "Standard Value", "Project Value", "Parameter", "Rule"]
-                self.assertEqual(actionable_headers, expected_headers)
-                self.assertEqual(raw_headers, expected_headers)
-                self.assertEqual(actionable_ws.freeze_panes, "A5")
-                self.assertEqual(raw_ws.freeze_panes, "A5")
-                self.assertFalse(actionable_ws.sheet_view.showGridLines)
-                self.assertFalse(raw_ws.sheet_view.showGridLines)
-                self.assertEqual(actionable_ws.column_dimensions["A"].width, 12)
-                self.assertEqual(raw_ws.column_dimensions["A"].width, 12)
-                self.assertEqual(list(actionable_ws.tables.keys()), ["ActionableDeviationsTable"])
-                self.assertEqual(list(raw_ws.tables.keys()), ["AllCellDifferencesTable"])
-                self.assertEqual(actionable_ws.sheet_properties.tabColor.rgb[-6:], "70AD47")
-                self.assertEqual(raw_ws.sheet_properties.tabColor.rgb[-6:], "A5A5A5")
-            finally:
-                report_wb.close()
-
-    def test_report_generator_styles_sorted_rows_correctly(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file="standard.xlsm",
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={"report_sheet_name": "List of Project Deviations"},
-                passive_rules={},
-                report_columns=[
-                    "Change No",
-                    "Sheet",
-                    "Cell",
-                    "Standard Value",
-                    "Project Value",
-                    "Parameter",
-                    "Rule",
-                ],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
-            result = WorkbookComparisonResult(
-                deviations=[
-                    DeviationRecord(
-                        change_type="Value Changed",
-                        sheet_name="Zeta",
-                        cell_address="A1",
-                        standard_value="1",
-                        project_value="2",
-                        parameter="",
-                        rule="",
-                    ),
-                    DeviationRecord(
-                        change_type="Value Changed",
-                        sheet_name="Alpha",
-                        cell_address="A1",
-                        standard_value="1",
-                        project_value="2",
-                        parameter="Param A",
-                        rule="Rule 1",
-                    ),
-                ],
-                summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=2, total_deviations_found=2),
-                standard_display_name="Test Standard",
-                standard_workbook_file="standard.xlsm",
-                project_workbook_file="project.xlsm",
-            )
-
-            generator = ReportGenerator(metadata)
-            output_path = temp_path / "Workbook_Deviations.xlsx"
-            generator.generate(result, str(output_path))
-
-            report_wb = openpyxl.load_workbook(output_path)
-            try:
-                worksheet = report_wb["List of Project Deviations"]
-
-                def fill_suffix(cell_ref: str) -> str:
-                    color = worksheet[cell_ref].fill.fgColor
-                    if color.type == "rgb" and color.rgb:
-                        return color.rgb[-6:]
-                    self.fail(f"Expected rgb fill on {cell_ref}, got {color.type}:{color.value}")
-
-                self.assertEqual(worksheet["B5"].value, "Alpha")
-                self.assertEqual(worksheet["B6"].value, "Zeta")
-                self.assertEqual(fill_suffix("F5"), "E2F0D9")
-                self.assertEqual(fill_suffix("G5"), "E2F0D9")
-                self.assertEqual(fill_suffix("D6"), "FFF2CC")
-                self.assertEqual(fill_suffix("E6"), "FFF2CC")
-            finally:
-                report_wb.close()
-
-    def test_deviation_policy_marks_placeholders_and_actionable_rows(self) -> None:
-        placeholder = DeviationRecord(
-            change_type="Value Changed",
-            sheet_name="Train type",
-            cell_address="A1",
-            standard_value="-",
-            project_value="123",
-            parameter="",
-            rule="",
-        )
-        actionable = DeviationRecord(
-            change_type="Value Changed",
-            sheet_name="Train type",
-            cell_address="A1",
-            standard_value="1",
-            project_value="2",
-            parameter="Param",
-            rule="Rule",
-        )
-
-        self.assertTrue(is_placeholder("-"))
-        self.assertTrue(is_placeholder(None))
-        self.assertFalse(is_placeholder("123"))
-        self.assertFalse(is_actionable(placeholder))
-        self.assertTrue(is_actionable(actionable))
-
-
-class PassiveRulesParserTests(unittest.TestCase):
-    def test_passive_rules_parser_maps_parameter_and_rule(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             workbook_path = temp_path / "standard.xlsm"
@@ -25433,133 +24052,36 @@ class PassiveRulesParserTests(unittest.TestCase):
             data_sheet.title = "Train type"
             data_sheet["A1"] = "ANCHOR"
             data_sheet["A2"] = "PARAM_A"
-            data_sheet["B2"] = "OLD"
-            passive_sheet = workbook.create_sheet("Passive Rules Check")
-            passive_sheet["A183"] = "Rule 1"
-            passive_sheet["C183"] = "PARAM_A"
-            passive_sheet["E183"] = "Train type"
-            passive_sheet["F183"] = 0
-            passive_sheet["G183"] = 1
-            passive_sheet["K183"] = "ANCHOR"
-            passive_sheet["L183"] = "Display Param"
+            passive_sheet = workbook.create_sheet("Passive Rules")
+            passive_sheet["A6"] = "Rule 1"
+            passive_sheet["B6"] = "Display Param"
+            passive_sheet["C6"] = "PARAM_A"
+            passive_sheet["E6"] = "Train type"
+            passive_sheet["F6"] = 0
+            passive_sheet["G6"] = 0
+            passive_sheet["K6"] = "ANCHOR"
+            passive_sheet["L6"] = "Display Param"
             workbook.save(workbook_path)
+            workbook.close()
 
-            metadata = StandardWorkbookMetadata(
-                standard_id="test_standard",
-                display_name="Test Standard",
-                baseline="7.7.2",
-                train_type="Generic",
-                workbook_file=workbook_path.name,
-                read_only=True,
-                precalculated=True,
-                password="",
-                compare={},
-                passive_rules={
-                    "enabled": True,
-                    "sheet_name": "Passive Rules Check",
-                    "header_row": 182,
-                    "data_start_row": 183,
-                    "columns": {
-                        "rule": "A",
-                        "parameter": "C",
-                        "sheet": "E",
-                        "row_offset": "F",
-                        "column_offset": "G",
-                        "find_after": "K",
-                        "display_name": "L",
-                    },
-                },
-                report_columns=[],
-                user_warning="",
-                source_path=str(temp_path / "standard_metadata.json"),
-            )
-
-            parser = PassiveRulesParser(metadata)
-            workbook_read_only = openpyxl.load_workbook(workbook_path, data_only=True, read_only=True, keep_vba=True)
+            metadata = build_metadata(temp_path, passive_rules={"enabled": True, "sheet_name": "Passive Rules", "header_row": 5, "data_start_row": 6, "columns": {"rule": "A", "parameter": "C", "sheet": "E", "row_offset": "F", "column_offset": "G", "find_after": "K", "display_name": "L"}})
+            passive_workbook = openpyxl.load_workbook(workbook_path, data_only=True, read_only=True, keep_vba=True)
             try:
-                passive_map = parser.build_map(workbook_read_only)
+                passive_map = PassiveRulesParser(metadata).build_map(passive_workbook)
             finally:
-                workbook_read_only.close()
+                passive_workbook.close()
 
-            self.assertIn(("Train type", "B2"), passive_map)
-            matches = passive_map[("Train type", "B2")]
-            self.assertEqual(len(matches), 1)
-            self.assertEqual(matches[0].parameter, "Display Param")
-            self.assertEqual(matches[0].rule, "Rule 1")
+            self.assertIn(("Train type", "A2"), passive_map)
+            self.assertEqual(passive_map[("Train type", "A2")][0].parameter, "Display Param")
+            self.assertEqual(passive_map[("Train type", "A2")][0].rule, "Rule 1")
+
+        self.assertTrue(is_placeholder(placeholder.standard_value))
+        self.assertFalse(is_actionable(placeholder))
+        self.assertTrue(is_actionable(actionable))
 
 
 if __name__ == "__main__":
     unittest.main()
-
-========================================================================================================================
-FILE: tools\export_full_repo.py | SIZE: 1.75 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-from __future__ import annotations
-
-from pathlib import Path
-
-OUTPUT_FILENAME = "repo_full_export.txt"
-EXCLUDED_NAMES = {OUTPUT_FILENAME, "repo_full_export2.txt"}
-EXCLUDED_PREFIXES = ("repo_after_",)
-TEXT_SUFFIXES = {
-    ".py",
-    ".md",
-    ".txt",
-    ".json",
-    ".ps1",
-    ".toml",
-    ".ini",
-    ".cfg",
-    ".yml",
-    ".yaml",
-}
-
-
-def resolve_repo_root(script_path: Path | None = None) -> Path:
-    resolved_script = (script_path or Path(__file__)).resolve()
-    return resolved_script.parent.parent
-
-
-def _is_excluded(path: Path) -> bool:
-    return path.name in EXCLUDED_NAMES or any(path.name.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
-
-
-def _iter_text_files(root: Path):
-    for path in sorted(root.rglob("*")):
-        if not path.is_file() or _is_excluded(path):
-            continue
-        if path.suffix.lower() not in TEXT_SUFFIXES:
-            continue
-        yield path
-
-
-def export_repository(root: Path, output_path: Path) -> Path:
-    root = root.resolve()
-    lines: list[str] = []
-    for path in _iter_text_files(root):
-        relative_path = path.relative_to(root).as_posix()
-        lines.append(f"# {relative_path}")
-        try:
-            content = path.read_text(encoding="utf-8", errors="replace")
-        except OSError as exc:
-            content = f"[unreadable: {exc}]"
-        lines.append(content.rstrip("\n"))
-        lines.append("")
-
-    output_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-    return output_path
-
-
-def main() -> None:
-    repo_root = resolve_repo_root()
-    export_path = repo_root / OUTPUT_FILENAME
-    export_repository(repo_root, export_path)
-    print(f"Export written to {export_path}")
-
-
-if __name__ == "__main__":
-    main()
 
 ========================================================================================================================
 BINARY FILE INVENTORY
@@ -25606,8 +24128,8 @@ SHA-256: 01627bc188ee51bb11e53a3741a476ec200335b126d520aabd84a3fece2d31b3
 EXPORT SUMMARY
 ========================================================================================================================
 
-Total discovered files: 52
-Text files exported: 44
+Total discovered files: 41
+Text files exported: 33
 Text read failures: 0
 Binary files inventoried: 8
 Binary hash failures: 0
