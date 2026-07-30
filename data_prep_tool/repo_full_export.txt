@@ -3,10 +3,10 @@
 REPOSITORY EXPORT INFORMATION
 ========================================================================================================================
 
-Export date: 2026-07-30T09:55:04
+Export date: 2026-07-30T14:43:34
 Repository root: C:\Python\data_prep_tool
 Output file: repo_full_export.txt
-Discovered files: 56
+Discovered files: 52
 Ignored directories: .git, .idea, .mypy_cache, .nox, .pytest_cache, .ruff_cache, .tox, .venv, .vscode, __pycache__, build, dist, env, logs, node_modules, site-packages, venv
 
 ========================================================================================================================
@@ -15,7 +15,7 @@ GIT REPOSITORY INFORMATION
 
 CURRENT COMMIT
 ----------------------------------------
-cfea5a96f9d8107fc9c92f2ddac56b0a3ce0a3c5
+f693f04400f831095984e642f07ea95f0e2ab748
 
 CURRENT BRANCH
 ----------------------------------------
@@ -24,48 +24,31 @@ main
 GIT STATUS
 ----------------------------------------
 ?? export_full_repo.py
-?? repo_full_export.txt
 
 TRACKED FILES
 ----------------------------------------
+.gitattributes
 .gitignore
 README.md
-Workbook_Deviations.xlsx
 app/__init__.py
-app/__pycache__/__init__.cpython-311.pyc
-app/__pycache__/__init__.cpython-314.pyc
-app/__pycache__/config.cpython-311.pyc
 app/comparison/__init__.py
+app/comparison/compare_worker.py
+app/comparison/deviation_policy.py
 app/comparison/models.py
 app/comparison/passive_rules_parser.py
 app/comparison/report_generator.py
+app/comparison/report_styles.py
 app/comparison/standard_metadata.py
 app/comparison/workbook_comparator.py
 app/config.py
 app/models/__init__.py
-app/models/__pycache__/__init__.cpython-311.pyc
-app/models/__pycache__/__init__.cpython-314.pyc
-app/models/__pycache__/train_type.cpython-311.pyc
-app/models/__pycache__/train_type.cpython-314.pyc
 app/models/train_type.py
 app/repositories/__init__.py
-app/repositories/__pycache__/__init__.cpython-311.pyc
-app/repositories/__pycache__/__init__.cpython-314.pyc
-app/repositories/__pycache__/base_repository.cpython-311.pyc
-app/repositories/__pycache__/base_repository.cpython-314.pyc
-app/repositories/__pycache__/local_json_repository.cpython-311.pyc
 app/repositories/base_repository.py
 app/repositories/local_json_repository.py
 app/repositories/sharepoint_repository.py
 app/runtime_assets.py
 app/services/__init__.py
-app/services/__pycache__/__init__.cpython-311.pyc
-app/services/__pycache__/__init__.cpython-314.pyc
-app/services/__pycache__/data_update_service.cpython-311.pyc
-app/services/__pycache__/excel_generator.cpython-311.pyc
-app/services/__pycache__/excel_generator.cpython-314.pyc
-app/services/__pycache__/train_type_service.cpython-311.pyc
-app/services/__pycache__/train_type_service.cpython-314.pyc
 app/services/data_update_service.py
 app/services/excel_generator.py
 app/services/rebuild.py
@@ -74,7 +57,6 @@ app/ui/__init__.py
 app/ui/compare_tab.py
 app/ui/main_window.py
 build.ps1
-create_template.py
 data/excel_mapping.json
 data/metadata.json
 data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm
@@ -83,22 +65,24 @@ data/train_type_values.json
 data/train_type_variants/Generic.json
 data/train_type_variants/HeavyDiesel.json
 data/train_type_variants/LightDiesel.json
+legacy/developer_utility/create_template.py
 main.py
 requirements.txt
 templates/train_type_template.xlsx
 tests/test_core.py
-~$Workbook_Deviations.xlsx
 
 LAST 10 COMMITS
 ----------------------------------------
-cfea5a9 (HEAD -> main, origin/main, origin/HEAD) CompareTool_v3
+f693f04 (HEAD -> main, origin/main, origin/HEAD) Final Version
+c88ad28 Cleaning revision
+a19b4e0 RaportEnchancment
+cfea5a9 CompareTool_v3
 ecf99eb CompareToolv2
 b5000e1 Integrate variant JSON rebuild generation
 9126d58 Jsony do konwersji
 32957fb Add workbook comparison feature
 505bc89 Poprawa funkcji zapisu
 e3ef9f7 Dopracowanie projektu i przeprowadzenie pytest
-02812f9 Pierwsza wersja mojego programu
 
 UNCOMMITTED DIFF
 ----------------------------------------
@@ -114,71 +98,69 @@ REPOSITORY STRUCTURE
 ========================================================================================================================
 
 data_prep_tool/
-    [TEXT] .gitignore (242 B)
-    [TEXT] build.ps1 (448 B)
-    [TEXT] create_template.py (1.95 KB)
+    [TEXT] .gitattributes (152 B)
+    [TEXT] .gitignore (343 B)
+    [TEXT] build.ps1 (742 B)
     [BINARY] DE18-ALS-DES-D000-ATC-D00058-00001_20260224_Step7 (1).xlsm (6.68 MB)
-    [BINARY] ENIO-ALS-SA11-D400-REG-000030_Di4_STEP7_20260709.xlsm (6.65 MB)
     [BINARY] ENIO-ALS-SA11-D400-REG-000030_Di4_STEP7_20260709_UNLOCKED.xlsm (6.31 MB)
     [TEXT] export_full_repo.py (11.87 KB)
     [BINARY] GATC_CRL_DESG_0926_v15_Clean (1).docx (527.83 KB)
-    [BINARY] GDPP_EVC_new_decode_Templ_with_FP_TRB_7.7.2_RC.xlsm (5.97 MB)
     [TEXT] main.py (1.07 KB)
-    [TEXT] README.md (7.60 KB)
+    [TEXT] README.md (8.50 KB)
     [TEXT] requirements.txt (60 B)
-    [BINARY] standard_7_7_2.xlsm (6.12 MB)
     [BINARY] standard_7_7_2_precalculated_UNLOCKED.xlsm (6.12 MB)
-    [BINARY] standard_7_7_2_unprotected.xlsm (6.12 MB)
-    [BINARY] standard_7_7_2_unprotected_UNLOCKED.xlsm (6.11 MB)
-    [BINARY] TrainType.xlsx (115.19 KB)
     [TEXT] TrainTypeDataPrepTool.spec (756 B)
-    [BINARY] Workbook_Deviations.xlsx (221.02 KB)
     [BINARY] ~$DE18-ALS-DES-D000-ATC-D00058-00001_20260224_Step7 (1).xlsm (165 B)
     [BINARY] ~$TC_CRL_DESG_0926_v15_Clean (1).docx (162 B)
-    [BINARY] ~$Workbook_Deviations.xlsx (165 B)
     app/
         [TEXT] __init__.py (0 B)
         [TEXT] config.py (3.07 KB)
         [TEXT] runtime_assets.py (2.31 KB)
     data/
         [TEXT] excel_mapping.json (162 B)
-        [TEXT] metadata.json (125 B)
+        [TEXT] metadata.json (123 B)
         [TEXT] train_type_values.json (1.01 KB)
         [TEXT] word_excel_match_report.json (2.02 KB)
+    legacy/
     templates/
         [BINARY] train_type_template.xlsx (115.19 KB)
     tests/
-        [TEXT] test_core.py (15.40 KB)
+        [TEXT] test_core.py (39.85 KB)
         comparison/
             [TEXT] __init__.py (36 B)
-            [TEXT] models.py (1.24 KB)
-            [TEXT] passive_rules_parser.py (7.99 KB)
-            [TEXT] report_generator.py (3.80 KB)
-            [TEXT] standard_metadata.py (4.51 KB)
-            [TEXT] workbook_comparator.py (12.49 KB)
+            [TEXT] compare_worker.py (2.25 KB)
+            [TEXT] deviation_policy.py (458 B)
+            [TEXT] models.py (1.35 KB)
+            [TEXT] passive_rules_parser.py (9.37 KB)
+            [TEXT] report_generator.py (21.20 KB)
+            [TEXT] report_styles.py (5.01 KB)
+            [TEXT] standard_metadata.py (4.52 KB)
+            [TEXT] workbook_comparator.py (13.77 KB)
         models/
             [TEXT] __init__.py (0 B)
             [TEXT] train_type.py (2.45 KB)
         repositories/
             [TEXT] __init__.py (0 B)
             [TEXT] base_repository.py (367 B)
-            [TEXT] local_json_repository.py (666 B)
+            [TEXT] local_json_repository.py (670 B)
             [TEXT] sharepoint_repository.py (1.97 KB)
         services/
             [TEXT] __init__.py (0 B)
-            [TEXT] data_update_service.py (1.08 KB)
-            [TEXT] excel_generator.py (6.00 KB)
-            [TEXT] rebuild.py (2.91 KB)
+            [TEXT] data_update_service.py (2.16 KB)
+            [TEXT] excel_generator.py (6.08 KB)
+            [TEXT] rebuild.py (3.96 KB)
             [TEXT] train_type_service.py (1.29 KB)
         ui/
             [TEXT] __init__.py (0 B)
-            [TEXT] compare_tab.py (13.89 KB)
+            [TEXT] compare_tab.py (17.31 KB)
             [TEXT] main_window.py (4.63 KB)
         standards/
         train_type_variants/
             [TEXT] Generic.json (99.00 KB)
             [TEXT] HeavyDiesel.json (98.82 KB)
             [TEXT] LightDiesel.json (98.16 KB)
+        developer_utility/
+            [TEXT] create_template.py (2.05 KB)
             7_7_2/
                 [BINARY] standard_7_7_2_precalculated_UNLOCKED.xlsm (6.12 MB)
                 [TEXT] standard_metadata.json (1.59 KB)
@@ -189,18 +171,37 @@ TEXT FILE CONTENTS
 
 
 ========================================================================================================================
-FILE: .gitignore | SIZE: 242 B | ENCODING: utf-8-sig
+FILE: .gitattributes | SIZE: 152 B | ENCODING: utf-8-sig
+========================================================================================================================
+
+* text=auto
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.ps1 text eol=crlf
+*.xlsx binary
+*.xlsm binary
+*.docx binary
+
+========================================================================================================================
+FILE: .gitignore | SIZE: 343 B | ENCODING: utf-8-sig
 ========================================================================================================================
 
 build/
 dist/
 logs/
 __pycache__/
-*.pyc
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
 *.spec
 *.log
 application.log
 .pytest_cache/
+repo_full_export*.txt
+repo_after_*.txt
+/Workbook_Deviations*.xlsx
 *.xlsm
 !data/standards/7_7_2/standard_7_7_2_precalculated_UNLOCKED.xlsm
 *.docx
@@ -210,7 +211,7 @@ TrainType.xlsx
 data/word_excel_match_report.json
 
 ========================================================================================================================
-FILE: README.md | SIZE: 7.60 KB | ENCODING: utf-8-sig
+FILE: README.md | SIZE: 8.50 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 # Train Type Data Preparation Tool
@@ -237,38 +238,40 @@ a project workbook against an embedded standard workbook and generates a deviati
 data_prep_tool/
 │
 ├── app/
+│   ├── comparison/                 # Embedded standard compare pipeline and report generation
 │   ├── ui/
-│   │   └── main_window.py          # Tkinter UI — no business logic
-│   │
+│   │   ├── main_window.py          # Tkinter shell
+│   │   └── compare_tab.py          # Compare tab UI and save flow
 │   ├── services/
-│   │   ├── train_type_service.py   # Resolves train type values from repository
-│   │   ├── excel_generator.py      # Writes values into a copy of the template
-│   │   └── data_update_service.py  # Reads/writes metadata.json (generation log)
-│   │
+│   │   ├── rebuild.py              # Primary Train Type generator from JSON variants
+│   │   ├── data_update_service.py  # Reads/writes metadata.json (generation log)
+│   │   ├── train_type_service.py   # Legacy compatibility path for value lookup
+│   │   └── excel_generator.py      # Legacy compatibility path for template writes
 │   ├── repositories/
-│   │   ├── base_repository.py      # Abstract base — load_train_type_values / load_excel_mapping
-│   │   ├── local_json_repository.py# Reads JSON from /data
-│   │   └── sharepoint_repository.py# Downloads JSON from SharePoint, falls back to local
-│   │
+│   │   ├── base_repository.py
+│   │   ├── local_json_repository.py
+│   │   └── sharepoint_repository.py
 │   ├── models/
-│   │   └── train_type.py           # TrainTypeValues dataclass
-│   │
-│   └── config.py                   # All paths and URLs (single source of truth)
-│
+│   │   └── train_type.py
+│   ├── runtime_assets.py           # Copies bundled runtime files into the writable app folder
+│   └── config.py
 ├── data/
 │   ├── train_type_variants/
-│   │   ├── Generic.json            # Full worksheet snapshot for Generic
-│   │   ├── HeavyDiesel.json        # Full worksheet snapshot for Heavy Diesel
-│   │   └── LightDiesel.json        # Full worksheet snapshot for Light Diesel
-│   ├── train_type_values.json      # Legacy mapping data (kept for compatibility)
-│   ├── excel_mapping.json          # Legacy mapping config (kept for compatibility)
+│   │   ├── Generic.json
+│   │   ├── HeavyDiesel.json
+│   │   └── LightDiesel.json
+│   ├── standards/7_7_2/
+│   │   ├── standard_7_7_2_precalculated_UNLOCKED.xlsm
+│   │   └── standard_metadata.json
+│   ├── train_type_values.json      # Legacy compatibility data
+│   ├── excel_mapping.json          # Legacy compatibility mapping
 │   └── metadata.json               # Generation history log (auto-updated)
-│
+├── legacy/
+│   └── developer_utility/
+│       └── create_template.py      # One-time template helper
 ├── templates/
-│   └── train_type_template.xlsx    # Excel template (never modified by the app)
-│
-├── main.py                         # Entry point — wires dependencies, launches UI
-├── create_template.py              # One-time helper to create the .xlsx template
+├── tests/
+├── main.py
 ├── requirements.txt
 └── README.md
 ```
@@ -291,20 +294,14 @@ cd data_prep_tool
 pip install -r requirements.txt
 ```
 
-### 2. Create the Excel template (run once)
-
-```bash
-python create_template.py
-```
-
-This writes `templates/train_type_template.xlsx`. Only run it again if you need
-to reset the template to its default layout.
-
-### 3. Run the application
+### 2. Run the application
 
 ```bash
 python main.py
 ```
+
+The primary Generate tab uses `RebuildService` and the JSON variants in `data/train_type_variants/`.
+The legacy template at `templates/train_type_template.xlsx` is already present and is only used by the retained compatibility path.
 
 ---
 
@@ -379,8 +376,10 @@ The application includes a second tab for deterministic workbook comparison.
 ### Output
 
 - `Workbook_Deviations.xlsx`
-- Worksheet: `List of Project Deviations`
-- Columns: `Change No`, `Sheet`, `Cell`, `Standard Value`, `Project Value`, `Parameter`, `Rule`
+- Worksheets in order: `Summary`, `List of Project Deviations`, `All Cell Differences`
+- Both deviation worksheets use the columns `Change No`, `Sheet`, `Cell`, `Standard Value`, `Project Value`, `Parameter`, `Rule`
+- `List of Project Deviations` is the actionable subset
+- `All Cell Differences` contains the full raw comparison output
 
 ### Comparison rules
 
@@ -391,7 +390,7 @@ The application includes a second tab for deterministic workbook comparison.
 - Uses Passive Rules enrichment from the embedded standard workbook when available.
 - Supports password-protected workbooks using `IDDP_Protection_842` when needed.
 
-The app shows a preview of the first deviations, then asks where to save `Workbook_Deviations.xlsx`.
+The app shows a preview of actionable deviations, then asks where to save `Workbook_Deviations.xlsx`.
 The standard workbook uses manual calculation mode, so Excel may need a manual recalc after opening the source workbook.
 
 ---
@@ -399,7 +398,13 @@ The standard workbook uses manual calculation mode, so Excel may need a manual r
 ## Building a standalone `.exe`
 
 ```powershell
-.uild.ps1
+.\build.ps1
+```
+
+To use a custom interpreter:
+
+```powershell
+.\build.ps1 -Python "C:\Program Files\Python314\python.exe"
 ```
 
 The resulting executable is at `dist\TrainTypeDataPrepTool.exe`.
@@ -426,12 +431,25 @@ Application logging is written to `application.log` in the application folder.
 
 ---
 
+## Developer utilities
+
+- `tools/export_full_repo.py` creates a review export and is not runtime code.
+- `legacy/developer_utility/create_template.py` recreates only the legacy template and is not required for normal Generate-tab operation.
+
+To recreate the legacy template manually:
+
+```powershell
+python legacy/developer_utility/create_template.py
+```
+
+---
+
 ## How it works
 
-1. On startup the app prepares runtime assets in the writable app folder.
-2. The user selects `Generic`, `Heavy Diesel`, or `Light Diesel`.
-3. A Save dialog asks where to write the output file.
-4. The app rebuilds the worksheet from the selected JSON variant and saves it.
+1. The primary Generate tab uses `RebuildService` plus `data/train_type_variants/*.json` to rebuild the selected variant.
+2. On startup the app prepares runtime assets in the writable app folder.
+3. The user selects `Generic`, `Heavy Diesel`, or `Light Diesel`.
+4. A Save dialog asks where to write the output file.
 5. A generation log entry is appended to `data/metadata.json`.
 
 ### Mapping modes
@@ -450,11 +468,14 @@ JSON keys against parameter names in column `D` and writing to column `E`.
 
 | Layer | Allowed dependencies |
 |---|---|
-| `ui/` | `services/` only |
+| `ui/` | `services/`, comparison orchestration |
+| `comparison/` | stdlib, openpyxl, local comparison helpers |
 | `services/` | `models/`, `repositories/`, `config` |
 | `repositories/` | `models/`, `config` |
 | `models/` | stdlib only |
 | `config.py` | stdlib only |
+
+`TrainTypeService`, `ExcelGenerator`, `train_type_values.json`, `excel_mapping.json`, and `SharePointRepository` are retained compatibility components, not the primary GUI generation path.
 
 ========================================================================================================================
 FILE: TrainTypeDataPrepTool.spec | SIZE: 756 B | ENCODING: utf-8-sig
@@ -500,16 +521,30 @@ exe = EXE(
 )
 
 ========================================================================================================================
-FILE: build.ps1 | SIZE: 448 B | ENCODING: utf-8-sig
+FILE: build.ps1 | SIZE: 742 B | ENCODING: utf-8-sig
 ========================================================================================================================
+
+param(
+  [string]$Python = "python"
+)
 
 $ErrorActionPreference = 'Stop'
 
-$python = 'C:/Users/bkrol/AppData/Local/Programs/Python/Python314/python.exe'
+$pythonCommand = Get-Command $Python -ErrorAction Stop
+$pythonPath = $pythonCommand.Source
+if (-not $pythonPath) {
+  $pythonPath = $pythonCommand.Path
+}
+if (-not $pythonPath) {
+  throw "Unable to resolve Python interpreter: $Python"
+}
 
-& $python -m pip install -r requirements.txt
+Write-Host "Using Python interpreter: $pythonPath"
+& $pythonPath --version
 
-& $python -m PyInstaller `
+& $pythonPath -m pip install -r requirements.txt
+
+& $pythonPath -m PyInstaller `
   --noconfirm `
   --clean `
   --onefile `
@@ -520,78 +555,6 @@ $python = 'C:/Users/bkrol/AppData/Local/Programs/Python/Python314/python.exe'
   main.py
 
 Write-Host 'Build complete. Check the dist\ folder for TrainTypeDataPrepTool.exe.'
-
-========================================================================================================================
-FILE: create_template.py | SIZE: 1.95 KB | ENCODING: utf-8-sig
-========================================================================================================================
-
-"""
-Run this script once to create templates/train_type_template.xlsx.
-
-Usage:
-    python create_template.py
-"""
-import os
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment
-
-TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
-OUTPUT_PATH = os.path.join(TEMPLATES_DIR, "train_type_template.xlsx")
-
-HEADER_FILL = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
-HEADER_FONT = Font(color="FFFFFF", bold=True, size=11)
-LABEL_FONT = Font(bold=True, size=10)
-LABEL_FILL = PatternFill(start_color="D6E4F0", end_color="D6E4F0", fill_type="solid")
-CENTER = Alignment(horizontal="center", vertical="center")
-
-ROWS = [
-    ("A1", "Parameter",        "B1", "Value"),
-    ("A2", "Max Speed (km/h)", "B2", ""),
-    ("A3", "Traction Type",    "B3", ""),
-    ("A4", "Axle Load (t)",    "B4", ""),
-    ("A5", "Length (m)",       "B5", ""),
-    ("A6", "Passenger Capacity","B6", ""),
-    ("A7", "Power (kW)",       "B7", ""),
-    ("A8", "Braking Distance (m)","B8", ""),
-    ("A9", "Bogies Count",     "B9", ""),
-    ("A10","Gauge (mm)",       "B10",""),
-    ("A11","Notes",            "B11",""),
-]
-
-
-def build_template() -> None:
-    os.makedirs(TEMPLATES_DIR, exist_ok=True)
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Train Type"
-
-    ws.column_dimensions["A"].width = 28
-    ws.column_dimensions["B"].width = 40
-
-    for label_cell, label_text, value_cell, value_text in ROWS:
-        lc = ws[label_cell]
-        lc.value = label_text
-        lc.alignment = CENTER
-
-        vc = ws[value_cell]
-        vc.value = value_text
-        vc.alignment = CENTER
-
-        if label_cell == "A1":
-            lc.font = HEADER_FONT
-            lc.fill = HEADER_FILL
-            vc.font = HEADER_FONT
-            vc.fill = HEADER_FILL
-        else:
-            lc.font = LABEL_FONT
-            lc.fill = LABEL_FILL
-
-    wb.save(OUTPUT_PATH)
-    print(f"Template created: {OUTPUT_PATH}")
-
-
-if __name__ == "__main__":
-    build_template()
 
 ========================================================================================================================
 FILE: export_full_repo.py | SIZE: 11.87 KB | ENCODING: utf-8-sig
@@ -1177,7 +1140,96 @@ FILE: app\comparison\__init__.py | SIZE: 36 B | ENCODING: utf-8-sig
 """Workbook comparison package."""
 
 ========================================================================================================================
-FILE: app\comparison\models.py | SIZE: 1.24 KB | ENCODING: utf-8-sig
+FILE: app\comparison\compare_worker.py | SIZE: 2.25 KB | ENCODING: utf-8-sig
+========================================================================================================================
+
+from __future__ import annotations
+
+import queue
+from dataclasses import dataclass, field
+
+from app.comparison.models import ComparisonError, StandardMetadataError, WorkbookComparisonResult, WorkbookLoadError
+from app.comparison.standard_metadata import StandardWorkbookMetadata
+from app.comparison.workbook_comparator import WorkbookComparator
+
+
+@dataclass(slots=True)
+class ComparisonWorkerProgress:
+    message: str
+    kind: str = field(init=False, default="progress")
+
+
+@dataclass(slots=True)
+class ComparisonWorkerSuccess:
+    result: WorkbookComparisonResult
+    kind: str = field(init=False, default="success")
+
+
+@dataclass(slots=True)
+class ComparisonWorkerFailure:
+    exception: Exception
+    error_kind: str
+    kind: str = field(init=False, default="error")
+
+
+ComparisonWorkerMessage = ComparisonWorkerProgress | ComparisonWorkerSuccess | ComparisonWorkerFailure
+
+
+def run_comparison_worker(
+    project_workbook_path: str,
+    metadata: StandardWorkbookMetadata,
+    message_queue: queue.Queue[ComparisonWorkerMessage],
+    comparator_factory: type[WorkbookComparator] = WorkbookComparator,
+) -> None:
+    comparator: WorkbookComparator | None = None
+
+    def progress_callback(message: str) -> None:
+        message_queue.put(ComparisonWorkerProgress(message=message))
+
+    try:
+        comparator = comparator_factory(
+            project_workbook_path=project_workbook_path,
+            metadata=metadata,
+            progress_callback=progress_callback,
+        )
+        result = comparator.compare_sheets()
+        message_queue.put(ComparisonWorkerSuccess(result=result))
+    except StandardMetadataError as exc:
+        message_queue.put(ComparisonWorkerFailure(exception=exc, error_kind="standard_metadata"))
+    except WorkbookLoadError as exc:
+        message_queue.put(ComparisonWorkerFailure(exception=exc, error_kind="workbook_load"))
+    except ComparisonError as exc:
+        message_queue.put(ComparisonWorkerFailure(exception=exc, error_kind="comparison"))
+    except Exception as exc:  # pragma: no cover - unexpected fallback
+        message_queue.put(ComparisonWorkerFailure(exception=exc, error_kind="unexpected"))
+    finally:
+        if comparator is not None:
+            comparator.close_workbooks()
+
+========================================================================================================================
+FILE: app\comparison\deviation_policy.py | SIZE: 458 B | ENCODING: utf-8-sig
+========================================================================================================================
+
+from typing import Any
+
+from app.comparison.models import DeviationRecord
+
+
+def is_placeholder(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip() in {"", "-"}
+    return False
+
+
+def is_actionable(deviation: DeviationRecord) -> bool:
+    if deviation.parameter.strip() or deviation.rule.strip():
+        return True
+    return not is_placeholder(deviation.standard_value)
+
+========================================================================================================================
+FILE: app\comparison\models.py | SIZE: 1.35 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 from dataclasses import dataclass, field
@@ -1224,6 +1276,9 @@ class WorkbookComparisonResult:
     deviations: list[DeviationRecord] = field(default_factory=list)
     summary: ComparisonSummary = field(default_factory=ComparisonSummary)
     output_file: str = ""
+    standard_display_name: str = ""
+    standard_workbook_file: str = ""
+    project_workbook_file: str = ""
 
 
 @dataclass(slots=True, frozen=True)
@@ -1232,14 +1287,15 @@ class PassiveRuleMatch:
     rule: str
 
 ========================================================================================================================
-FILE: app\comparison\passive_rules_parser.py | SIZE: 7.99 KB | ENCODING: utf-8-sig
+FILE: app\comparison\passive_rules_parser.py | SIZE: 9.37 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
 from dataclasses import dataclass, field
 from typing import Any
+from bisect import bisect_right
 
-from openpyxl.utils.cell import column_index_from_string, get_column_letter, range_boundaries
+from openpyxl.utils.cell import get_column_letter, range_boundaries
 
 from app.comparison.models import PassiveRuleMatch
 from app.comparison.standard_metadata import StandardWorkbookMetadata
@@ -1279,7 +1335,7 @@ class PassiveRulesParser:
     def _safe_int(value: Any, default: int | None = None) -> int | None:
         try:
             return int(value)
-        except Exception:
+        except (TypeError, ValueError):
             return default
 
     @staticmethod
@@ -1351,16 +1407,24 @@ class PassiveRulesParser:
             if anchor_key is None:
                 return None
             anchor_positions = sheet_index.value_positions.get(anchor_key, [])
+            parameter_positions = sheet_index.value_positions.get(parameter_key, [])
+            if not parameter_positions:
+                return None
             for anchor_position in anchor_positions:
-                for candidate_index in range(anchor_position + 1, len(sheet_index.entries)):
-                    if sheet_index.entries[candidate_index].value == parameter_key:
-                        return candidate_index
+                candidate_offset = bisect_right(parameter_positions, anchor_position)
+                if candidate_offset < len(parameter_positions):
+                    return parameter_positions[candidate_offset]
             return None
 
         positions = sheet_index.value_positions.get(parameter_key, [])
         return positions[0] if positions else None
 
     def build_map(self, workbook) -> dict[tuple[str, str], list[PassiveRuleMatch]]:
+        self._sheet_indexes.clear()
+
+        if not self._metadata.passive_rules_enabled:
+            return {}
+
         passive_rules_sheet_name = self._metadata.passive_rules_sheet_name
         if passive_rules_sheet_name not in workbook.sheetnames:
             logger.warning("Passive rules sheet '%s' not found.", passive_rules_sheet_name)
@@ -1372,9 +1436,17 @@ class PassiveRulesParser:
         max_row = passive_rules_sheet.max_row or data_start_row
         current_rule = ""
         matches_by_cell: dict[tuple[str, str], list[PassiveRuleMatch]] = {}
+        parsed_candidate_rows = 0
+        mapped_rows = 0
+        missing_sheet_rows = 0
+        invalid_offset_rows = 0
+        missing_anchor_rows = 0
+        invalid_target_rows = 0
+        unexpected_error_rows = 0
 
         for row_number in range(data_start_row, max_row + 1):
             try:
+                parsed_candidate_rows += 1
                 rule_value = passive_rules_sheet[f"{columns.get('rule', 'A')}{row_number}"].value
                 if rule_value not in (None, ""):
                     current_rule = self._normalize_text(rule_value) or current_rule
@@ -1389,16 +1461,19 @@ class PassiveRulesParser:
                 if not parameter or not sheet_name:
                     continue
                 if row_offset is None or column_offset is None:
-                    logger.warning("Skipping passive rule row %s due to invalid offsets.", row_number)
+                    invalid_offset_rows += 1
+                    logger.debug("Skipping passive rule row %s due to invalid offsets.", row_number)
                     continue
                 if sheet_name not in workbook.sheetnames:
-                    logger.warning("Passive rule row %s references missing sheet '%s'.", row_number, sheet_name)
+                    missing_sheet_rows += 1
+                    logger.debug("Passive rule row %s references missing sheet '%s'.", row_number, sheet_name)
                     continue
 
                 sheet_index = self._build_sheet_index(workbook, sheet_name)
                 anchor_index = self._find_anchor_index(sheet_index, parameter, find_after=find_after)
                 if anchor_index is None:
-                    logger.warning(
+                    missing_anchor_rows += 1
+                    logger.debug(
                         "Passive rule row %s could not locate parameter '%s' on sheet '%s'.",
                         row_number,
                         parameter,
@@ -1410,39 +1485,128 @@ class PassiveRulesParser:
                 target_row = anchor_cell.row + row_offset
                 target_column = anchor_cell.column + column_offset
                 if target_row < 1 or target_column < 1:
-                    logger.warning("Skipping passive rule row %s due to invalid target cell offsets.", row_number)
+                    invalid_target_rows += 1
+                    logger.debug("Skipping passive rule row %s due to invalid target cell offsets.", row_number)
                     continue
 
                 target_address = f"{get_column_letter(target_column)}{target_row}"
                 report_parameter = display_name or parameter
                 report_rule = current_rule or ""
-                matches_by_cell.setdefault((sheet_name, target_address), []).append(
-                    PassiveRuleMatch(parameter=report_parameter, rule=report_rule)
-                )
+                cell_key = (sheet_name, target_address)
+                candidate = PassiveRuleMatch(parameter=report_parameter, rule=report_rule)
+                matches = matches_by_cell.setdefault(cell_key, [])
+                if candidate not in matches:
+                    matches.append(candidate)
+                    mapped_rows += 1
             except Exception:
-                logger.warning("Bad passive rule row %s skipped.", row_number, exc_info=True)
+                unexpected_error_rows += 1
+                logger.warning("Unexpected passive rule parsing error on row %s.", row_number, exc_info=True)
                 continue
+
+        logger.info(
+            "Passive rules parsed: parsed_candidate_rows=%s mapped_rows=%s missing_sheet_rows=%s invalid_offset_rows=%s missing_anchor_rows=%s invalid_target_rows=%s unexpected_error_rows=%s",
+            parsed_candidate_rows,
+            mapped_rows,
+            missing_sheet_rows,
+            invalid_offset_rows,
+            missing_anchor_rows,
+            invalid_target_rows,
+            unexpected_error_rows,
+        )
 
         return matches_by_cell
 
 ========================================================================================================================
-FILE: app\comparison\report_generator.py | SIZE: 3.80 KB | ENCODING: utf-8-sig
+FILE: app\comparison\report_generator.py | SIZE: 21.20 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
+from collections import defaultdict
+from copy import copy
 from pathlib import Path
+from typing import Any
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.utils import get_column_letter
+from openpyxl.formatting.rule import DataBarRule
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
+from app.comparison.deviation_policy import is_actionable, is_placeholder
 from app.comparison.models import ReportGenerationError, WorkbookComparisonResult
 from app.comparison.standard_metadata import StandardWorkbookMetadata
+from app.comparison.report_styles import (
+    ACTIONABLE_SHEET_NAME,
+    ACTIONABLE_TAB_COLOR,
+    ACTIONABLE_TABLE_NAME,
+    DEVIATION_BASE_BORDER,
+    DEVIATION_BASE_FONT,
+    DEVIATION_COLUMN_WIDTHS,
+    DEVIATION_COUNT_FONT,
+    DEVIATION_COLUMN_ALIGNMENTS,
+    DEVIATION_HEADER_FILL,
+    DEVIATION_HEADER_ALIGNMENT,
+    DEVIATION_HEADER_BORDER,
+    DEVIATION_HEADER_FONT,
+    DEVIATION_MAPPED_FILL,
+    DEVIATION_MAPPED_FONT,
+    DEVIATION_MISSING_FONT,
+    DEVIATION_MISSING_SHEET_FILL,
+    DEVIATION_PAGE_MARGINS,
+    DEVIATION_BLUE_FILL,
+    DEVIATION_RED_FILL,
+    DEVIATION_SUBTITLE_FONT,
+    DEVIATION_TITLE_FONT,
+    DEVIATION_YELLOW_FILL,
+    RAW_SHEET_NAME,
+    RAW_TAB_COLOR,
+    RAW_TABLE_NAME,
+    SUMMARY_ALERT_FILL,
+    SUMMARY_CENTER_ALIGNMENT,
+    SUMMARY_COLUMN_WIDTHS,
+    SUMMARY_KPI_BORDER,
+    SUMMARY_KPI_LABEL_FILL,
+    SUMMARY_KPI_VALUE_FILL,
+    SUMMARY_KPI_VALUE_FONT,
+    SUMMARY_LABEL_FILL,
+    SUMMARY_LABEL_FONT,
+    SUMMARY_LEGEND_FONT,
+    SUMMARY_LEFT_ALIGNMENT,
+    SUMMARY_METRIC_LABEL_FILL,
+    SUMMARY_METRIC_VALUE_FILL,
+    SUMMARY_METRIC_FONT,
+    SUMMARY_NOTE_FILL,
+    SUMMARY_NOTE_FONT,
+    SUMMARY_PAGE_MARGINS,
+    SUMMARY_INFO_FILL,
+    SUMMARY_POSITIVE_FILL,
+    SUMMARY_SHEET_NAME,
+    SUMMARY_SUBTITLE_FILL,
+    SUMMARY_SUBTITLE_FONT,
+    SUMMARY_TABLE_NAME,
+    SUMMARY_TITLE_ALIGNMENT,
+    SUMMARY_TITLE_FILL,
+    SUMMARY_TITLE_FONT,
+    SUMMARY_WARNING_FILL,
+    SUMMARY_TAB_COLOR,
+    SUMMARY_VALUE_BORDER,
+    SUMMARY_VALUE_FILL,
+    SUMMARY_VALUE_FONT,
+    FLOAT_DISPLAY_FORMAT,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class ReportGenerator:
+    HEADERS = [
+        "Change No",
+        "Sheet",
+        "Cell",
+        "Standard Value",
+        "Project Value",
+        "Parameter",
+        "Rule",
+    ]
+
     def __init__(self, metadata: StandardWorkbookMetadata | None = None) -> None:
         self._metadata = metadata
 
@@ -1454,19 +1618,10 @@ class ReportGenerator:
 
     @property
     def headers(self) -> list[str]:
-        if self._metadata is not None and self._metadata.report_columns:
-            return list(self._metadata.report_columns)
-        return [
-            "Change No",
-            "Sheet",
-            "Cell",
-            "Standard Value",
-            "Project Value",
-            "Parameter",
-            "Rule",
-        ]
+        return list(self.HEADERS)
 
-    def _sheet_sort_key(self, item) -> tuple[str, int, int]:
+    @staticmethod
+    def _sheet_sort_key(item: Any) -> tuple[str, int, int]:
         sheet_name = item.sheet_name or ""
         cell = item.cell_address or ""
         if cell == "-":
@@ -1479,47 +1634,430 @@ class ReportGenerator:
         except Exception:
             return sheet_name, 10**9, 10**9
 
-    def generate(self, result: WorkbookComparisonResult, output_path: str) -> str:
-        try:
-            workbook = Workbook()
-            worksheet = workbook.active
-            worksheet.title = self.report_sheet_name
+    @staticmethod
+    def _display_value(value: Any) -> Any:
+        return "" if value is None else value
 
-            headers = self.headers
-            worksheet.append(headers)
+    @staticmethod
+    def _count_by_sheet(deviations: list[Any]) -> dict[str, dict[str, int]]:
+        counts = defaultdict(lambda: {"raw": 0, "actionable": 0, "mapped": 0})
+        for deviation in deviations:
+            sheet_name = deviation.sheet_name or ""
+            counts[sheet_name]["raw"] += 1
+            if is_actionable(deviation):
+                counts[sheet_name]["actionable"] += 1
+            if deviation.parameter.strip() or deviation.rule.strip():
+                counts[sheet_name]["mapped"] += 1
+        return counts
 
-            header_fill = PatternFill(fill_type="solid", fgColor="1F4E79")
-            header_font = Font(color="FFFFFF", bold=True)
-            header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-            for cell in worksheet[1]:
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = header_alignment
+    @staticmethod
+    def _apply_range_style(worksheet: Any, cell_range: str, fill, font, alignment, border=None) -> None:
+        cell = worksheet[cell_range.split(":")[0]]
+        cell.fill = fill
+        cell.font = copy(font)
+        cell.alignment = copy(alignment)
+        if border is not None:
+            cell.border = copy(border)
 
-            data_alignment = Alignment(vertical="top", wrap_text=True)
-            for change_no, deviation in enumerate(sorted(result.deviations, key=self._sheet_sort_key), start=1):
+    @staticmethod
+    def _configure_summary_sheet(workbook: Workbook, result: WorkbookComparisonResult):
+        worksheet = workbook.create_sheet(SUMMARY_SHEET_NAME)
+        worksheet.sheet_view.showGridLines = False
+        worksheet.sheet_view.zoomScale = 90
+        worksheet.freeze_panes = "A8"
+        worksheet.sheet_properties.tabColor = SUMMARY_TAB_COLOR
+        worksheet.page_setup.orientation = "landscape"
+        worksheet.page_setup.fitToWidth = 1
+        worksheet.page_setup.fitToHeight = 0
+        worksheet.page_margins = SUMMARY_PAGE_MARGINS
+        worksheet.print_title_rows = "1:7"
+
+        for column, width in SUMMARY_COLUMN_WIDTHS.items():
+            worksheet.column_dimensions[column].width = width
+
+        worksheet.row_dimensions[2].height = 30
+        worksheet.row_dimensions[3].height = 22
+        worksheet.row_dimensions[5].height = 18
+        worksheet.row_dimensions[6].height = 18
+        worksheet.row_dimensions[7].height = 18
+        worksheet.row_dimensions[9].height = 18
+        worksheet.row_dimensions[10].height = 24
+        worksheet.row_dimensions[11].height = 24
+        worksheet.row_dimensions[13].height = 20
+        worksheet.row_dimensions[14].height = 18
+        worksheet.row_dimensions[15].height = 18
+
+        worksheet["B2"] = "FastPrep Comparison Report"
+        worksheet.merge_cells("B2:F2")
+        ReportGenerator._apply_range_style(
+            worksheet,
+            "B2:F2",
+            SUMMARY_TITLE_FILL,
+            SUMMARY_TITLE_FONT,
+            SUMMARY_TITLE_ALIGNMENT,
+        )
+
+        worksheet["B3"] = "Project deviations against embedded standard"
+        worksheet.merge_cells("B3:F3")
+        ReportGenerator._apply_range_style(
+            worksheet,
+            "B3:F3",
+            SUMMARY_SUBTITLE_FILL,
+            SUMMARY_SUBTITLE_FONT,
+            SUMMARY_TITLE_ALIGNMENT,
+        )
+
+        standard_display_name = result.standard_display_name or ""
+        standard_file = result.standard_workbook_file or ""
+        project_file = result.project_workbook_file or ""
+
+        metadata_rows = [
+            (5, "Standard", standard_display_name),
+            (6, "Standard file", standard_file),
+            (7, "Project file", project_file),
+        ]
+        for row_number, label, value in metadata_rows:
+            worksheet[f"B{row_number}"] = label
+            worksheet[f"C{row_number}"] = value
+            worksheet.merge_cells(f"C{row_number}:F{row_number}")
+            ReportGenerator._apply_range_style(
+                worksheet,
+                f"B{row_number}:B{row_number}",
+                SUMMARY_LABEL_FILL,
+                SUMMARY_LABEL_FONT,
+                SUMMARY_LEFT_ALIGNMENT,
+                SUMMARY_VALUE_BORDER,
+            )
+            ReportGenerator._apply_range_style(
+                worksheet,
+                f"C{row_number}:F{row_number}",
+                SUMMARY_VALUE_FILL,
+                SUMMARY_VALUE_FONT,
+                SUMMARY_LEFT_ALIGNMENT,
+                SUMMARY_VALUE_BORDER,
+            )
+
+        raw_deviations = list(result.deviations)
+        actionable_deviations = [deviation for deviation in raw_deviations if is_actionable(deviation)]
+        mapped_count = sum(1 for deviation in raw_deviations if deviation.parameter.strip() or deviation.rule.strip())
+
+        card_specs = [
+            ("B9:C9", "B10:C11", "Raw differences", len(raw_deviations)),
+            ("D9:E9", "D10:E11", "Actionable differences", len(actionable_deviations)),
+            ("F9:G9", "F10:G11", "Passive Rules mapped", mapped_count),
+        ]
+        for label_range, value_range, label, value in card_specs:
+            start_label = label_range.split(":")[0]
+            start_value = value_range.split(":")[0]
+            worksheet[start_label] = label
+            worksheet[start_value] = value
+            worksheet[start_value].number_format = "#,##0"
+            worksheet.merge_cells(label_range)
+            worksheet.merge_cells(value_range)
+            ReportGenerator._apply_range_style(
+                worksheet,
+                label_range,
+                SUMMARY_KPI_LABEL_FILL,
+                SUMMARY_LABEL_FONT,
+                SUMMARY_CENTER_ALIGNMENT,
+                SUMMARY_KPI_BORDER,
+            )
+            ReportGenerator._apply_range_style(
+                worksheet,
+                value_range,
+                SUMMARY_KPI_VALUE_FILL,
+                SUMMARY_KPI_VALUE_FONT,
+                SUMMARY_CENTER_ALIGNMENT,
+                SUMMARY_KPI_BORDER,
+            )
+
+        metric_specs = [
+            ("B13", "Sheets compared", result.summary.total_sheets_compared, "#,##0"),
+            ("D13", "Non-empty positions compared", result.summary.total_cells_compared, "#,##0"),
+            ("F13", "Execution time [s]", result.summary.execution_time_seconds, "0.00"),
+        ]
+        for label_cell, label, value, number_format in metric_specs:
+            value_cell = chr(ord(label_cell[0]) + 1) + label_cell[1:]
+            worksheet[label_cell] = label
+            worksheet[value_cell] = value
+            worksheet[label_cell].fill = copy(SUMMARY_METRIC_LABEL_FILL)
+            worksheet[label_cell].font = copy(SUMMARY_METRIC_FONT)
+            worksheet[label_cell].alignment = SUMMARY_LEFT_ALIGNMENT
+            worksheet[value_cell].fill = SUMMARY_METRIC_VALUE_FILL
+            worksheet[value_cell].font = copy(SUMMARY_METRIC_FONT)
+            worksheet[value_cell].alignment = SUMMARY_CENTER_ALIGNMENT
+            worksheet[label_cell].border = copy(SUMMARY_VALUE_BORDER)
+            worksheet[value_cell].border = copy(SUMMARY_VALUE_BORDER)
+            worksheet[value_cell].number_format = number_format
+
+        legend_items = [
+            ("B14:C14", "green = Passive Rules mapping found", SUMMARY_POSITIVE_FILL),
+            ("D14:E14", "yellow = existing standard value changed", SUMMARY_WARNING_FILL),
+            ("F14:G14", "blue = value populated where standard was blank/-", SUMMARY_INFO_FILL),
+            ("B15:G15", "red = missing project value or missing sheet", SUMMARY_ALERT_FILL),
+        ]
+        for cell_range, text, fill in legend_items:
+            start_cell = cell_range.split(":")[0]
+            worksheet[start_cell] = text
+            worksheet.merge_cells(cell_range)
+            ReportGenerator._apply_range_style(
+                worksheet,
+                cell_range,
+                fill,
+                SUMMARY_LEGEND_FONT,
+                SUMMARY_LEFT_ALIGNMENT,
+            )
+        worksheet["B15"].font = copy(SUMMARY_NOTE_FONT)
+
+        sheet_counts = ReportGenerator._count_by_sheet(raw_deviations)
+        summary_rows = [
+            (sheet_name, counts["raw"], counts["actionable"], counts["mapped"])
+            for sheet_name, counts in sheet_counts.items()
+        ]
+        summary_rows.sort(key=lambda row: (-row[1], row[0]))
+
+        worksheet["B16"] = "Sheet"
+        worksheet["C16"] = "Raw differences"
+        worksheet["D16"] = "Actionable differences"
+        worksheet["E16"] = "Passive Rules mapped"
+
+        summary_data_end_row = 16 + max(len(summary_rows), 1)
+        if summary_rows:
+            for index, row in enumerate(summary_rows, start=17):
+                worksheet[f"B{index}"] = row[0]
+                worksheet[f"C{index}"] = row[1]
+                worksheet[f"D{index}"] = row[2]
+                worksheet[f"E{index}"] = row[3]
+        else:
+            worksheet["B17"] = ""
+            worksheet["C17"] = 0
+            worksheet["D17"] = 0
+            worksheet["E17"] = 0
+
+        summary_table = Table(displayName=SUMMARY_TABLE_NAME, ref=f"B16:E{summary_data_end_row}")
+        summary_table.tableStyleInfo = TableStyleInfo(
+            name="TableStyleMedium2",
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
+        )
+        worksheet.add_table(summary_table)
+
+        for row in range(17, summary_data_end_row + 1):
+            worksheet[f"C{row}"].number_format = "#,##0"
+            worksheet[f"D{row}"].number_format = "#,##0"
+            worksheet[f"E{row}"].number_format = "#,##0"
+
+        if summary_rows:
+            worksheet.conditional_formatting.add(
+                f"C17:C{summary_data_end_row}",
+                DataBarRule(start_type="min", start_value=None, end_type="max", end_value=None, color="5B9BD5"),
+            )
+            worksheet.conditional_formatting.add(
+                f"D17:D{summary_data_end_row}",
+                DataBarRule(start_type="min", start_value=None, end_type="max", end_value=None, color="5B9BD5"),
+            )
+
+        footer_row = summary_data_end_row + 2
+        worksheet.merge_cells(start_row=footer_row, start_column=2, end_row=footer_row, end_column=5)
+        footer_cell = worksheet.cell(footer_row, 2)
+        footer_cell.value = (
+            "All Cell Differences contains the complete unfiltered comparison output. "
+            "List of Project Deviations is the actionable subset."
+        )
+        footer_cell.fill = SUMMARY_NOTE_FILL
+        footer_cell.font = copy(SUMMARY_NOTE_FONT)
+        footer_cell.alignment = SUMMARY_LEFT_ALIGNMENT
+        worksheet.row_dimensions[footer_row].height = 32
+
+        return worksheet
+
+    @staticmethod
+    def _configure_deviation_sheet(
+        worksheet,
+        tab_color: str,
+        subtitle_text: str,
+        count_text: str,
+    ) -> None:
+        worksheet.sheet_view.showGridLines = False
+        worksheet.sheet_view.zoomScale = 85
+        worksheet.freeze_panes = "A5"
+        worksheet.sheet_properties.tabColor = tab_color
+        worksheet.page_setup.orientation = "landscape"
+        worksheet.page_setup.fitToWidth = 1
+        worksheet.page_setup.fitToHeight = 0
+        worksheet.page_margins = DEVIATION_PAGE_MARGINS
+        worksheet.print_title_rows = "1:4"
+
+        for column, width in DEVIATION_COLUMN_WIDTHS.items():
+            worksheet.column_dimensions[column].width = width
+
+        worksheet.row_dimensions[1].height = 28
+        worksheet.row_dimensions[2].height = 24
+        worksheet.row_dimensions[3].height = 20
+        worksheet.row_dimensions[4].height = 28
+
+        worksheet["A1"] = worksheet.title
+        worksheet.merge_cells("A1:G1")
+        ReportGenerator._apply_range_style(
+            worksheet,
+            "A1:G1",
+            SUMMARY_TITLE_FILL,
+            DEVIATION_TITLE_FONT,
+            SUMMARY_TITLE_ALIGNMENT,
+        )
+
+        worksheet["A2"] = subtitle_text
+        worksheet.merge_cells("A2:G2")
+        ReportGenerator._apply_range_style(
+            worksheet,
+            "A2:G2",
+            SUMMARY_SUBTITLE_FILL,
+            DEVIATION_SUBTITLE_FONT,
+            SUMMARY_LEFT_ALIGNMENT,
+        )
+
+        worksheet["A3"] = count_text
+        worksheet.merge_cells("A3:G3")
+        ReportGenerator._apply_range_style(
+            worksheet,
+            "A3:G3",
+            SUMMARY_NOTE_FILL,
+            DEVIATION_COUNT_FONT,
+            SUMMARY_TITLE_ALIGNMENT,
+        )
+
+        for index, header in enumerate(ReportGenerator().headers, start=1):
+            cell = worksheet.cell(4, index)
+            cell.value = header
+            cell.fill = DEVIATION_HEADER_FILL
+            cell.font = copy(DEVIATION_HEADER_FONT)
+            cell.alignment = DEVIATION_HEADER_ALIGNMENT
+            cell.border = DEVIATION_HEADER_BORDER
+
+    @staticmethod
+    def _style_deviation_row(worksheet: Any, row_number: int, deviation: Any) -> None:
+        standard_is_placeholder = is_placeholder(deviation.standard_value)
+        project_is_placeholder = is_placeholder(deviation.project_value)
+        is_missing_sheet = deviation.cell_address == "-"
+        is_mapped = bool(deviation.parameter.strip() or deviation.rule.strip())
+        both_non_placeholder = not standard_is_placeholder and not project_is_placeholder
+
+        for column in range(1, 8):
+            cell = worksheet.cell(row_number, column)
+            cell.border = copy(DEVIATION_BASE_BORDER)
+            cell.font = copy(DEVIATION_BASE_FONT)
+            cell.alignment = copy(DEVIATION_COLUMN_ALIGNMENTS[column])
+
+        if is_missing_sheet:
+            for column in range(1, 8):
+                cell = worksheet.cell(row_number, column)
+                cell.fill = DEVIATION_MISSING_SHEET_FILL
+                cell.font = copy(DEVIATION_MISSING_FONT)
+            return
+
+        if is_mapped:
+            for column in (6, 7):
+                cell = worksheet.cell(row_number, column)
+                cell.fill = DEVIATION_MAPPED_FILL
+                cell.font = copy(DEVIATION_MAPPED_FONT)
+
+        if both_non_placeholder:
+            for column in (4, 5):
+                worksheet.cell(row_number, column).fill = DEVIATION_YELLOW_FILL
+        elif standard_is_placeholder and not project_is_placeholder:
+            worksheet.cell(row_number, 5).fill = DEVIATION_BLUE_FILL
+        elif project_is_placeholder and not standard_is_placeholder:
+            worksheet.cell(row_number, 4).fill = DEVIATION_RED_FILL
+
+        for column in (4, 5):
+            cell = worksheet.cell(row_number, column)
+            if isinstance(cell.value, float):
+                cell.number_format = FLOAT_DISPLAY_FORMAT
+
+    def _write_deviation_sheet(
+        self,
+        workbook: Workbook,
+        title: str,
+        subtitle_text: str,
+        tab_color: str,
+        table_name: str,
+        table_style_name: str,
+        deviations,
+        actionable_only: bool,
+    ) -> Any:
+        worksheet = workbook.create_sheet(title)
+        rows = list(deviations)
+        visible_rows = [row for row in rows if is_actionable(row)] if actionable_only else rows
+        count_text = f"Rows: {len(visible_rows)} of {len(rows)} raw differences" if actionable_only else f"Rows: {len(visible_rows)}"
+        self._configure_deviation_sheet(worksheet, tab_color, subtitle_text, count_text)
+
+        sorted_rows = sorted(visible_rows, key=self._sheet_sort_key)
+
+        if not sorted_rows:
+            worksheet.append([None] * 7)
+        else:
+            for change_no, deviation in enumerate(sorted_rows, start=1):
                 worksheet.append(
                     [
                         change_no,
                         deviation.sheet_name,
                         deviation.cell_address,
-                        deviation.standard_value,
-                        deviation.project_value,
-                        deviation.parameter,
-                        deviation.rule,
+                        self._display_value(deviation.standard_value),
+                        self._display_value(deviation.project_value),
+                        self._display_value(deviation.parameter),
+                        self._display_value(deviation.rule),
                     ]
                 )
 
-            for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row):
-                for cell in row:
-                    cell.alignment = data_alignment
+        last_row = worksheet.max_row
+        for row_number, deviation in enumerate(sorted_rows, start=5):
+            self._style_deviation_row(worksheet, row_number, deviation)
 
-            widths = [12, 28, 12, 28, 28, 32, 22]
-            for index, width in enumerate(widths, start=1):
-                worksheet.column_dimensions[get_column_letter(index)].width = width
+        table_ref_end = last_row if visible_rows else 5
+        table = Table(displayName=table_name, ref=f"A4:G{table_ref_end}")
+        table.tableStyleInfo = TableStyleInfo(
+            name=table_style_name,
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
+        )
+        worksheet.add_table(table)
 
-            worksheet.freeze_panes = "A2"
-            worksheet.auto_filter.ref = worksheet.dimensions
+        return worksheet
+
+    def generate(self, result: WorkbookComparisonResult, output_path: str) -> str:
+        workbook = None
+        try:
+            workbook = Workbook()
+            workbook.remove(workbook.active)
+            workbook.properties.title = "FastPrep Comparison Report"
+            workbook.properties.subject = "Project deviations against embedded standard"
+            workbook.properties.creator = "Train Type Data Preparation Tool"
+
+            self._configure_summary_sheet(workbook, result)
+            self._write_deviation_sheet(
+                workbook,
+                ACTIONABLE_SHEET_NAME,
+                "Actionable differences. Rows mapped by Passive Rules are highlighted.",
+                ACTIONABLE_TAB_COLOR,
+                ACTIONABLE_TABLE_NAME,
+                "TableStyleMedium2",
+                result.deviations,
+                actionable_only=True,
+            )
+            self._write_deviation_sheet(
+                workbook,
+                RAW_SHEET_NAME,
+                "Complete unfiltered cell-by-cell comparison output.",
+                RAW_TAB_COLOR,
+                RAW_TABLE_NAME,
+                "TableStyleMedium4",
+                result.deviations,
+                actionable_only=False,
+            )
 
             output_file = Path(output_path)
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -1529,9 +2067,132 @@ class ReportGenerator:
         except Exception as exc:
             logger.exception("Failed to generate deviation report.")
             raise ReportGenerationError(f"Failed to generate deviation report: {exc}") from exc
+        finally:
+            if workbook is not None:
+                workbook.close()
 
 ========================================================================================================================
-FILE: app\comparison\standard_metadata.py | SIZE: 4.51 KB | ENCODING: utf-8-sig
+FILE: app\comparison\report_styles.py | SIZE: 5.01 KB | ENCODING: utf-8-sig
+========================================================================================================================
+
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.worksheet.page import PageMargins
+
+SUMMARY_SHEET_NAME = "Summary"
+ACTIONABLE_SHEET_NAME = "List of Project Deviations"
+RAW_SHEET_NAME = "All Cell Differences"
+
+SUMMARY_TABLE_NAME = "SummaryBySheet"
+ACTIONABLE_TABLE_NAME = "ActionableDeviationsTable"
+RAW_TABLE_NAME = "AllCellDifferencesTable"
+
+SUMMARY_TAB_COLOR = "1F4E78"
+ACTIONABLE_TAB_COLOR = "70AD47"
+RAW_TAB_COLOR = "A5A5A5"
+
+SUMMARY_COLUMN_WIDTHS = {
+    "A": 3,
+    "B": 32,
+    "C": 22,
+    "D": 22,
+    "E": 22,
+    "F": 22,
+    "G": 12,
+}
+
+DEVIATION_COLUMN_WIDTHS = {
+    "A": 12,
+    "B": 32,
+    "C": 12,
+    "D": 34,
+    "E": 34,
+    "F": 44,
+    "G": 42,
+}
+
+SUMMARY_PAGE_MARGINS = PageMargins(left=0.25, right=0.25, top=0.5, bottom=0.5, header=0.2, footer=0.2)
+DEVIATION_PAGE_MARGINS = PageMargins(left=0.2, right=0.2, top=0.4, bottom=0.4, header=0.2, footer=0.2)
+
+SUMMARY_TITLE_FONT = Font(color="FFFFFF", bold=True, size=18)
+SUMMARY_SUBTITLE_FONT = Font(color="17365D", italic=True, size=11)
+SUMMARY_LABEL_FONT = Font(color="FFFFFF", bold=True, size=10)
+SUMMARY_VALUE_FONT = Font(color="17365D", bold=True, size=10)
+SUMMARY_KPI_VALUE_FONT = Font(color="17365D", bold=True, size=18)
+SUMMARY_METRIC_FONT = Font(color="17365D", bold=True, size=10)
+SUMMARY_LEGEND_FONT = Font(color="17365D", bold=True, size=10)
+SUMMARY_NOTE_FONT = Font(color="666666", italic=True, size=10)
+
+DEVIATION_TITLE_FONT = Font(color="FFFFFF", bold=True, size=16)
+DEVIATION_SUBTITLE_FONT = Font(color="17365D", italic=True, size=10)
+DEVIATION_COUNT_FONT = Font(color="666666", bold=True, size=10)
+DEVIATION_HEADER_FONT = Font(color="FFFFFF", bold=True, size=10)
+DEVIATION_BASE_FONT = Font(name="Calibri", size=10)
+DEVIATION_MAPPED_FONT = Font(name="Calibri", size=10, bold=True, color="375623")
+DEVIATION_MISSING_FONT = Font(name="Calibri", size=9, bold=True, color="9C0006")
+
+SUMMARY_TITLE_FILL = PatternFill(fill_type="solid", fgColor="17365D")
+SUMMARY_SUBTITLE_FILL = PatternFill(fill_type="solid", fgColor="D9EAF7")
+SUMMARY_LABEL_FILL = PatternFill(fill_type="solid", fgColor="5B9BD5")
+SUMMARY_VALUE_FILL = PatternFill(fill_type="solid", fgColor="EAF2F8")
+SUMMARY_KPI_LABEL_FILL = PatternFill(fill_type="solid", fgColor="4472C4")
+SUMMARY_KPI_VALUE_FILL = PatternFill(fill_type="solid", fgColor="D9E2F3")
+SUMMARY_METRIC_LABEL_FILL = PatternFill(fill_type="solid", fgColor="D9E1F2")
+SUMMARY_METRIC_VALUE_FILL = PatternFill(fill_type="solid", fgColor="FFFFFF")
+SUMMARY_NOTE_FILL = PatternFill(fill_type="solid", fgColor="F2F2F2")
+SUMMARY_POSITIVE_FILL = PatternFill(fill_type="solid", fgColor="E2F0D9")
+SUMMARY_WARNING_FILL = PatternFill(fill_type="solid", fgColor="FFF2CC")
+SUMMARY_INFO_FILL = PatternFill(fill_type="solid", fgColor="DDEBF7")
+SUMMARY_ALERT_FILL = PatternFill(fill_type="solid", fgColor="F4CCCC")
+
+DEVIATION_HEADER_FILL = PatternFill(fill_type="solid", fgColor="1F4E78")
+DEVIATION_YELLOW_FILL = PatternFill(fill_type="solid", fgColor="FFF2CC")
+DEVIATION_BLUE_FILL = PatternFill(fill_type="solid", fgColor="DDEBF7")
+DEVIATION_RED_FILL = PatternFill(fill_type="solid", fgColor="FCE4D6")
+DEVIATION_MAPPED_FILL = PatternFill(fill_type="solid", fgColor="E2F0D9")
+DEVIATION_MISSING_SHEET_FILL = PatternFill(fill_type="solid", fgColor="F4CCCC")
+FLOAT_DISPLAY_FORMAT = "0.###############"
+
+SUMMARY_VALUE_BORDER = Border(
+    left=Side(style="thin", color="D9D9D9"),
+    right=Side(style="thin", color="D9D9D9"),
+    top=Side(style="thin", color="D9D9D9"),
+    bottom=Side(style="thin", color="D9D9D9"),
+)
+SUMMARY_KPI_BORDER = Border(
+    left=Side(style="medium", color="5B9BD5"),
+    right=Side(style="medium", color="5B9BD5"),
+    top=Side(style="medium", color="5B9BD5"),
+    bottom=Side(style="medium", color="5B9BD5"),
+)
+DEVIATION_HEADER_BORDER = Border(
+    left=Side(style="thin", color="FFFFFF"),
+    right=Side(style="thin", color="FFFFFF"),
+    top=Side(style="thin", color="FFFFFF"),
+    bottom=Side(style="medium", color="1F4E78"),
+)
+DEVIATION_BASE_BORDER = Border(
+    left=Side(style="thin", color="D9D9D9"),
+    right=Side(style="thin", color="D9D9D9"),
+    top=Side(style="thin", color="D9D9D9"),
+    bottom=Side(style="thin", color="D9D9D9"),
+)
+
+DEVIATION_HEADER_ALIGNMENT = Alignment(horizontal="center", vertical="center", wrap_text=True)
+DEVIATION_COLUMN_ALIGNMENTS = {
+    1: Alignment(horizontal="center", vertical="top"),
+    2: Alignment(horizontal="left", vertical="top", wrap_text=True),
+    3: Alignment(horizontal="center", vertical="top"),
+    4: Alignment(horizontal="left", vertical="top", wrap_text=True),
+    5: Alignment(horizontal="left", vertical="top", wrap_text=True),
+    6: Alignment(horizontal="left", vertical="top", wrap_text=True),
+    7: Alignment(horizontal="left", vertical="top", wrap_text=True),
+}
+SUMMARY_TITLE_ALIGNMENT = Alignment(horizontal="left", vertical="center")
+SUMMARY_CENTER_ALIGNMENT = Alignment(horizontal="center", vertical="center")
+SUMMARY_LEFT_ALIGNMENT = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+========================================================================================================================
+FILE: app\comparison\standard_metadata.py | SIZE: 4.52 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import json
@@ -1627,12 +2288,12 @@ class StandardWorkbookMetadata:
         return self.compare.get("report_sheet_name", "List of Project Deviations")
 
     @property
-    def ignored_sheets(self) -> list[str]:
-        return list(self.compare.get("ignored_sheets", []))
+    def ignored_sheets(self) -> set[str]:
+        return set(self.compare.get("ignored_sheets", []))
 
     @property
-    def ignored_prefixes(self) -> list[str]:
-        return list(self.compare.get("ignored_prefixes", []))
+    def ignored_prefixes(self) -> tuple[str, ...]:
+        return tuple(self.compare.get("ignored_prefixes", []))
 
     @property
     def passive_rules_enabled(self) -> bool:
@@ -1655,7 +2316,7 @@ class StandardWorkbookMetadata:
         return dict(self.passive_rules.get("columns", {}))
 
 ========================================================================================================================
-FILE: app\comparison\workbook_comparator.py | SIZE: 12.49 KB | ENCODING: utf-8-sig
+FILE: app\comparison\workbook_comparator.py | SIZE: 13.77 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import io
@@ -1663,8 +2324,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Callable
-from zipfile import BadZipFile
+from typing import Any, Callable
 
 import openpyxl
 from openpyxl.utils.cell import get_column_letter, range_boundaries
@@ -1673,7 +2333,6 @@ from app.comparison.models import (
     ComparisonSummary,
     DeviationRecord,
     PassiveRuleMatch,
-    StandardMetadataError,
     WorkbookComparisonResult,
     WorkbookLoadError,
 )
@@ -1682,9 +2341,11 @@ from app.comparison.report_generator import ReportGenerator
 from app.comparison.standard_metadata import StandardWorkbookMetadata
 from app.config import STANDARD_7_7_2_METADATA_FILE
 
+MAX_COMPARISON_AREA = 10_000_000
+
 try:
     import msoffcrypto
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     msoffcrypto = None
 
 logger = logging.getLogger(__name__)
@@ -1711,6 +2372,9 @@ class WorkbookComparator:
         self._standard_workbook = None
         self._project_workbook = None
         self._passive_match_map: dict[tuple[str, str], list[PassiveRuleMatch]] = {}
+        self._standard_display_name = self._metadata.display_name
+        self._standard_workbook_file = Path(self._standard_workbook_path).name
+        self._project_workbook_file = Path(self._project_workbook_path).name
 
     @property
     def standard_display_name(self) -> str:
@@ -1739,7 +2403,7 @@ class WorkbookComparator:
         return value
 
     @staticmethod
-    def _sheet_bounds(worksheet):
+    def _sheet_bounds(worksheet: Any) -> tuple[int, int, int, int] | None:
         try:
             dimension = worksheet.calculate_dimension()
         except ValueError:
@@ -1753,7 +2417,7 @@ class WorkbookComparator:
 
         return range_boundaries(dimension)
 
-    def _load_protected_workbook(self, file_path: str):
+    def _load_protected_workbook(self, file_path: str) -> Any:
         if msoffcrypto is None:
             raise WorkbookLoadError(
                 "This workbook appears to be password-protected, but the optional decryption library is not available."
@@ -1773,7 +2437,7 @@ class WorkbookComparator:
                 keep_vba=True,
             )
 
-    def _load_workbook(self, file_path: str):
+    def _load_workbook(self, file_path: str) -> Any:
         resolved_file_path = os.path.abspath(file_path)
         if not os.path.exists(resolved_file_path):
             raise WorkbookLoadError(f"Workbook not found: {resolved_file_path}")
@@ -1787,12 +2451,18 @@ class WorkbookComparator:
             )
         except Exception as exc:
             logger.warning("openpyxl load failed for %s: %s", resolved_file_path, exc)
+            if msoffcrypto is None:
+                raise WorkbookLoadError(
+                    f"Unable to load workbook '{resolved_file_path}': normal load failed ({exc}) and encrypted fallback is unavailable."
+                ) from exc
             try:
                 return self._load_protected_workbook(resolved_file_path)
             except Exception as protected_exc:
-                raise WorkbookLoadError(f"Unable to load workbook '{resolved_file_path}': {protected_exc}") from protected_exc
+                raise WorkbookLoadError(
+                    f"Unable to load workbook '{resolved_file_path}': normal load failed ({exc}); encrypted fallback failed ({protected_exc})."
+                ) from protected_exc
 
-    def load_workbooks(self):
+    def load_workbooks(self) -> tuple[Any, Any]:
         self._progress(f"Loading standard workbook: {self._metadata.display_name}")
         self._standard_workbook = self._load_workbook(self._standard_workbook_path)
         self._progress("Loading project workbook...")
@@ -1815,7 +2485,7 @@ class WorkbookComparator:
         self._standard_workbook = None
         self._project_workbook = None
 
-    def _visible_compare_sheet_names(self, workbook) -> set[str]:
+    def _visible_compare_sheet_names(self, workbook: Any) -> set[str]:
         ignored_sheets = set(self._metadata.ignored_sheets)
         ignored_prefixes = tuple(self._metadata.ignored_prefixes)
         sheet_names: set[str] = set()
@@ -1839,7 +2509,7 @@ class WorkbookComparator:
         rules = list(dict.fromkeys(match.rule for match in matches if match.rule))
         return "; ".join(parameters), "; ".join(rules)
 
-    def compare_cells(self, standard_sheet, project_sheet) -> tuple[list[DeviationRecord], int]:
+    def compare_cells(self, standard_sheet: Any, project_sheet: Any) -> tuple[list[DeviationRecord], int]:
         standard_bounds = self._sheet_bounds(standard_sheet)
         project_bounds = self._sheet_bounds(project_sheet)
 
@@ -1855,6 +2525,15 @@ class WorkbookComparator:
             min_row = min(standard_bounds[1], project_bounds[1])
             max_col = max(standard_bounds[2], project_bounds[2])
             max_row = max(standard_bounds[3], project_bounds[3])
+
+        rows = max_row - min_row + 1
+        columns = max_col - min_col + 1
+        if rows * columns > MAX_COMPARISON_AREA:
+            start_cell = f"{get_column_letter(min_col)}{min_row}"
+            end_cell = f"{get_column_letter(max_col)}{max_row}"
+            raise WorkbookLoadError(
+                f"Comparison area too large for sheet '{standard_sheet.title}' ({start_cell}:{end_cell}, {rows} rows x {columns} columns)."
+            )
 
         deviations: list[DeviationRecord] = []
         cells_compared = 0
@@ -1900,6 +2579,7 @@ class WorkbookComparator:
         return deviations, cells_compared
 
     def compare_sheets(self) -> WorkbookComparisonResult:
+        compare_start = time.perf_counter()
         if self._standard_workbook is None or self._project_workbook is None:
             self.load_workbooks()
 
@@ -1952,21 +2632,26 @@ class WorkbookComparator:
             total_sheets_compared=len(common_sheets),
             total_cells_compared=total_cells_compared,
             total_deviations_found=len(deviations),
+            execution_time_seconds=round(time.perf_counter() - compare_start, 2),
         )
-        return WorkbookComparisonResult(deviations=deviations, summary=summary)
+        return WorkbookComparisonResult(
+            deviations=deviations,
+            summary=summary,
+            standard_display_name=self._standard_display_name,
+            standard_workbook_file=self._standard_workbook_file,
+            project_workbook_file=self._project_workbook_file,
+        )
 
     def save_report(self, result: WorkbookComparisonResult, output_path: str) -> str:
         return self._report_generator.generate(result, output_path)
 
     def generate_report(self, output_path: str | None = None) -> WorkbookComparisonResult:
-        start_time = time.perf_counter()
         try:
             self.load_workbooks()
             result = self.compare_sheets()
             if output_path is None:
                 output_path = str(Path(self._project_workbook_path).with_name(self.report_name))
             result.output_file = self.save_report(result, output_path)
-            result.summary.execution_time_seconds = round(time.perf_counter() - start_time, 2)
             return result
         finally:
             self.close_workbooks()
@@ -2072,7 +2757,7 @@ class BaseRepository(ABC):
         """Return the excel_mapping structure as a dict."""
 
 ========================================================================================================================
-FILE: app\repositories\local_json_repository.py | SIZE: 666 B | ENCODING: utf-8-sig
+FILE: app\repositories\local_json_repository.py | SIZE: 670 B | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import json
@@ -2089,7 +2774,7 @@ class LocalJsonRepository(BaseRepository):
 
     def _load_file(self, path: str) -> dict[str, Any]:
         logger.info("Loading local file: %s", path)
-        with open(path, encoding="utf-8") as fh:
+        with open(path, encoding="utf-8-sig") as fh:
             return json.load(fh)
 
     def load_train_type_values(self) -> dict[str, Any]:
@@ -2172,12 +2857,13 @@ FILE: app\services\__init__.py | SIZE: 0 B | ENCODING: utf-8-sig
 
 
 ========================================================================================================================
-FILE: app\services\data_update_service.py | SIZE: 1.08 KB | ENCODING: utf-8-sig
+FILE: app\services\data_update_service.py | SIZE: 2.16 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import json
 import logging
 import os
+import tempfile
 from datetime import datetime, timezone
 from typing import Any
 
@@ -2186,14 +2872,28 @@ from app.config import METADATA_FILE
 logger = logging.getLogger(__name__)
 
 
+def _default_metadata() -> dict[str, Any]:
+    return {
+        "schema_version": "1.0",
+        "description": "Train Type Data Preparation Tool metadata",
+        "generation_history": [],
+    }
+
+
 class DataUpdateService:
 
     def get_metadata(self) -> dict[str, Any]:
         if not os.path.exists(METADATA_FILE):
             logger.warning("metadata.json not found at: %s", METADATA_FILE)
-            return {}
-        with open(METADATA_FILE, encoding="utf-8") as fh:
-            return json.load(fh)
+            return _default_metadata()
+        with open(METADATA_FILE, encoding="utf-8-sig") as fh:
+            metadata = json.load(fh)
+        if not isinstance(metadata, dict):
+            return _default_metadata()
+        metadata.setdefault("schema_version", "1.0")
+        metadata.setdefault("description", "Train Type Data Preparation Tool metadata")
+        metadata.setdefault("generation_history", [])
+        return metadata
 
     def record_generation_event(self, train_type: str, output_path: str) -> None:
         metadata = self.get_metadata()
@@ -2205,12 +2905,24 @@ class DataUpdateService:
                 "output_path": output_path,
             }
         )
-        with open(METADATA_FILE, "w", encoding="utf-8") as fh:
-            json.dump(metadata, fh, indent=2, ensure_ascii=False)
-        logger.info("Recorded generation event for train type '%s'.", train_type)
+        target_dir = os.path.dirname(METADATA_FILE)
+        os.makedirs(target_dir, exist_ok=True)
+        temp_path = ""
+        try:
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False, dir=target_dir) as temp_file:
+                temp_path = temp_file.name
+                json.dump(metadata, temp_file, indent=2, ensure_ascii=False)
+            os.replace(temp_path, METADATA_FILE)
+            logger.info("Recorded generation event for train type '%s'.", train_type)
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    logger.debug("Temporary metadata file cleanup failed for %s", temp_path, exc_info=True)
 
 ========================================================================================================================
-FILE: app\services\excel_generator.py | SIZE: 6.00 KB | ENCODING: utf-8-sig
+FILE: app\services\excel_generator.py | SIZE: 6.08 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
@@ -2356,22 +3068,25 @@ class ExcelGenerator:
         logger.info("Copied template to: %s", output_path)
 
         wb = openpyxl.load_workbook(output_path)
+        try:
+            if self._mapping:
+                self._write_with_explicit_mappings(wb, train_type_values)
+            if self._parameter_column_mapping is not None:
+                self._write_with_parameter_column_mapping(wb, train_type_values)
 
-        if self._mapping:
-            self._write_with_explicit_mappings(wb, train_type_values)
-        if self._parameter_column_mapping is not None:
-            self._write_with_parameter_column_mapping(wb, train_type_values)
-
-        wb.save(output_path)
-        logger.info("Excel file saved: %s", output_path)
+            wb.save(output_path)
+            logger.info("Excel file saved: %s", output_path)
+        finally:
+            wb.close()
 
 ========================================================================================================================
-FILE: app\services\rebuild.py | SIZE: 2.91 KB | ENCODING: utf-8-sig
+FILE: app\services\rebuild.py | SIZE: 3.96 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import json
 import logging
 import os
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -2412,7 +3127,7 @@ class RebuildService:
             raise FileNotFoundError(f"Variant file not found: {variant.json_path}")
 
         logger.info("Loading train type variant from: %s", variant.json_path)
-        with open(variant.json_path, "r", encoding="utf-8") as file_obj:
+        with open(variant.json_path, "r", encoding="utf-8-sig") as file_obj:
             data = json.load(file_obj)
 
         required_keys = {"sheet_name", "cells", "column_widths", "row_heights", "merged_cells"}
@@ -2422,7 +3137,29 @@ class RebuildService:
                 f"Variant file '{variant.json_path}' is missing required keys: {', '.join(sorted(missing))}"
             )
 
+        self._validate_variant_cells(variant.json_path, data)
+
         return data
+
+    @staticmethod
+    def _looks_like_serialized_openpyxl_object(value: Any) -> bool:
+        if not isinstance(value, str):
+            return False
+        return value.startswith("<openpyxl.") or re.search(r" object at 0x[0-9A-Fa-f]+>", value) is not None
+
+    def _validate_variant_cells(self, variant_path: str, data: dict[str, Any]) -> None:
+        cells = data.get("cells", {})
+        if not isinstance(cells, dict):
+            return
+
+        for address, cell_data in cells.items():
+            if not isinstance(cell_data, dict):
+                continue
+            for field_name, field_value in cell_data.items():
+                if self._looks_like_serialized_openpyxl_object(field_value):
+                    raise ValueError(
+                        f"Variant file '{variant_path}' contains invalid serialized object text at cell {address} field '{field_name}'."
+                    )
 
     def generate_excel(self, train_type: str, output_path: str) -> None:
         data = self._load_variant_json(train_type)
@@ -2452,8 +3189,11 @@ class RebuildService:
             except Exception:
                 logger.warning("Merge error for range %s", merged_range, exc_info=True)
 
-        workbook.save(output_path)
-        logger.info("Saved rebuilt workbook for '%s' to: %s", train_type, output_path)
+        try:
+            workbook.save(output_path)
+            logger.info("Saved rebuilt workbook for '%s' to: %s", train_type, output_path)
+        finally:
+            workbook.close()
 
 ========================================================================================================================
 FILE: app\services\train_type_service.py | SIZE: 1.29 KB | ENCODING: utf-8-sig
@@ -2500,18 +3240,28 @@ FILE: app\ui\__init__.py | SIZE: 0 B | ENCODING: utf-8-sig
 
 
 ========================================================================================================================
-FILE: app\ui\compare_tab.py | SIZE: 13.89 KB | ENCODING: utf-8-sig
+FILE: app\ui\compare_tab.py | SIZE: 17.31 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import logging
 import os
+import queue
 import time
+import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from app.comparison.models import ComparisonError, StandardMetadataError, WorkbookLoadError
+from app.comparison.deviation_policy import is_actionable
+from app.comparison.compare_worker import (
+    ComparisonWorkerFailure,
+    ComparisonWorkerMessage,
+    ComparisonWorkerProgress,
+    ComparisonWorkerSuccess,
+    run_comparison_worker,
+)
+from app.comparison.models import ComparisonError
+from app.comparison.report_generator import ReportGenerator
 from app.comparison.standard_metadata import StandardWorkbookMetadata
-from app.comparison.workbook_comparator import WorkbookComparator
 from app.config import STANDARD_7_7_2_METADATA_FILE, STANDARD_7_7_2_WORKBOOK
 
 logger = logging.getLogger(__name__)
@@ -2529,25 +3279,33 @@ class CompareTab:
         self._warning_text = tk.StringVar(value="")
         self._sheets_text = tk.StringVar(value="-")
         self._cells_text = tk.StringVar(value="-")
-        self._deviations_text = tk.StringVar(value="-")
+        self._raw_deviations_text = tk.StringVar(value="-")
+        self._actionable_deviations_text = tk.StringVar(value="-")
         self._time_text = tk.StringVar(value="-")
         self._output_text = tk.StringVar(value="-")
-        self._preview_title_text = tk.StringVar(value="No comparison run yet.")
+        self._preview_title_text = tk.StringVar(value="Preview of actionable deviations")
         self._preview_count_text = tk.StringVar(value="-")
         self._preview_note_text = tk.StringVar(
-            value="Run a comparison to preview the first deviations before saving the report."
+            value="Run a comparison to preview the actionable deviations before saving the report."
         )
         self._preview_rows: list[tuple[str, str, str, str, str, str]] = []
+        self._raw_count_for_preview = 0
+        self._comparison_queue: queue.Queue[ComparisonWorkerMessage] | None = None
+        self._comparison_thread: threading.Thread | None = None
+        self._comparison_running = False
+        self._comparison_started_at = 0.0
         self._metadata_error: str = ""
 
         try:
             self._metadata = StandardWorkbookMetadata.load(STANDARD_7_7_2_METADATA_FILE)
             self._standard_display_text.set(f"{self._metadata.display_name} ({os.path.basename(STANDARD_7_7_2_WORKBOOK)})")
             self._warning_text.set(self._metadata.user_warning)
+            self._report_generator = ReportGenerator(self._metadata)
             self._metadata_error = ""
         except Exception as exc:
             logger.exception("Failed to load standard metadata.")
             self._metadata = None
+            self._report_generator = None
             self._metadata_error = f"Standard metadata could not be loaded from {STANDARD_7_7_2_METADATA_FILE}: {exc}"
             self._standard_display_text.set("Unavailable")
             self._warning_text.set(self._metadata_error)
@@ -2594,10 +3352,11 @@ class CompareTab:
         summary.columnconfigure(1, weight=1)
 
         self._add_summary_row(summary, 0, "Total Sheets Compared", self._sheets_text)
-        self._add_summary_row(summary, 1, "Total Cells Compared", self._cells_text)
-        self._add_summary_row(summary, 2, "Total Deviations Found", self._deviations_text)
-        self._add_summary_row(summary, 3, "Execution Time", self._time_text)
-        self._add_summary_row(summary, 4, "Output File", self._output_text)
+        self._add_summary_row(summary, 1, "Non-empty Cell Positions Compared", self._cells_text)
+        self._add_summary_row(summary, 2, "Raw Deviations", self._raw_deviations_text)
+        self._add_summary_row(summary, 3, "Actionable Deviations", self._actionable_deviations_text)
+        self._add_summary_row(summary, 4, "Execution Time", self._time_text)
+        self._add_summary_row(summary, 5, "Output File", self._output_text)
 
         preview = ttk.LabelFrame(container, text="Preview Before Saving", padding=12)
         preview.grid(row=6, column=0, columnspan=3, sticky="nsew", pady=(0, 12))
@@ -2665,21 +3424,19 @@ class CompareTab:
         self._status_text.set(message)
         self._root.update_idletasks()
 
-    def _progress_callback(self, message: str) -> None:
-        self._set_status(message)
-
     def _clear_summary(self) -> None:
         self._sheets_text.set("-")
         self._cells_text.set("-")
-        self._deviations_text.set("-")
+        self._raw_deviations_text.set("-")
+        self._actionable_deviations_text.set("-")
         self._time_text.set("-")
         self._output_text.set("-")
 
     def _clear_preview(self) -> None:
-        self._preview_title_text.set("No comparison run yet.")
+        self._preview_title_text.set("Preview of actionable deviations")
         self._preview_count_text.set("-")
         self._preview_note_text.set(
-            "Run a comparison to preview the first deviations before saving the report."
+            "Run a comparison to preview the actionable deviations before saving the report."
         )
         self._preview_rows = []
         for item in self._preview_tree.get_children():
@@ -2699,16 +3456,16 @@ class CompareTab:
             for item in preview_rows
         ]
 
-        self._preview_title_text.set("Preview of first deviations")
+        self._preview_title_text.set("Preview of actionable deviations")
         self._preview_count_text.set(
-            f"Showing {len(self._preview_rows)} of {len(deviations)} deviations before saving the report."
+            f"Showing {len(self._preview_rows)} actionable deviations of {len(deviations)} actionable from {self._raw_count_for_preview} raw differences."
         )
         if deviations:
             self._preview_note_text.set(
                 "Review the preview below. The report will be saved only after you confirm the file location."
             )
         else:
-            self._preview_note_text.set("No deviations were found. A report can still be saved if needed.")
+            self._preview_note_text.set("No actionable deviations were found. A report can still be saved if needed.")
 
         for item in self._preview_tree.get_children():
             self._preview_tree.delete(item)
@@ -2716,46 +3473,100 @@ class CompareTab:
         for row in self._preview_rows:
             self._preview_tree.insert("", "end", values=row)
 
-    def _on_generate(self) -> None:
-        if self._metadata is None:
-            messagebox.showerror("Comparison unavailable", self._metadata_error or "Standard workbook metadata could not be loaded.")
-            return
-
-        project_path = self._project_path.get().strip()
-        if not project_path:
-            messagebox.showwarning("Missing File", "Please select the project workbook first.")
-            return
-
-        if not os.path.exists(project_path):
-            messagebox.showerror("Missing File", f"Project workbook not found:\n{project_path}")
+    def _start_comparison(self, project_path: str) -> None:
+        if self._comparison_running:
+            messagebox.showwarning("Comparison in progress", "Please wait for the current comparison to finish.")
             return
 
         self._clear_summary()
         self._clear_preview()
+        self._comparison_queue = queue.Queue()
+        self._comparison_thread = threading.Thread(
+            target=run_comparison_worker,
+            args=(project_path, self._metadata, self._comparison_queue),
+            daemon=True,
+        )
+        self._comparison_running = True
+        self._comparison_started_at = time.perf_counter()
         self._generate_btn.configure(state="disabled")
         self._set_status("Workbook loading...")
-        start_time = time.perf_counter()
-        comparator = None
+        self._comparison_thread.start()
+        self._root.after(100, self._poll_comparison_queue)
+
+    def _poll_comparison_queue(self) -> None:
+        if not self._comparison_running or self._comparison_queue is None:
+            return
+
+        while True:
+            try:
+                event = self._comparison_queue.get_nowait()
+            except queue.Empty:
+                break
+
+            if isinstance(event, ComparisonWorkerProgress):
+                self._set_status(event.message)
+                continue
+
+            if isinstance(event, ComparisonWorkerSuccess):
+                self._handle_comparison_success(event.result)
+                return
+
+            if isinstance(event, ComparisonWorkerFailure):
+                self._handle_comparison_failure(event)
+                return
+
+        if self._comparison_running:
+            self._root.after(100, self._poll_comparison_queue)
+
+    def _finish_comparison_session(self) -> None:
+        self._comparison_running = False
+        self._comparison_queue = None
+        self._comparison_thread = None
+        self._generate_btn.configure(state="normal")
+
+    def _handle_comparison_failure(self, event: ComparisonWorkerFailure) -> None:
+        try:
+            logger.error(
+                "Comparison failed in worker: %s",
+                event.exception,
+                exc_info=(type(event.exception), event.exception, event.exception.__traceback__),
+            )
+            if event.error_kind == "standard_metadata":
+                self._set_status(f"Error: {event.exception}")
+                messagebox.showerror(
+                    "Comparison Failed",
+                    f"Standard metadata could not be loaded:\n{STANDARD_7_7_2_METADATA_FILE}\n\n{event.exception}",
+                )
+            elif event.error_kind == "workbook_load":
+                self._set_status(f"Error: {event.exception}")
+                messagebox.showerror("Workbook Loading Failed", str(event.exception))
+            elif event.error_kind == "comparison":
+                self._set_status(f"Error: {event.exception}")
+                messagebox.showerror("Comparison Failed", str(event.exception))
+            else:
+                self._set_status(f"Unexpected error: {event.exception}")
+                messagebox.showerror("Comparison Failed", str(event.exception))
+        finally:
+            self._finish_comparison_session()
+
+    def _handle_comparison_success(self, result) -> None:
+        raw_count = len(result.deviations)
+        actionable_deviations = [deviation for deviation in result.deviations if is_actionable(deviation)]
+        compare_elapsed = result.summary.execution_time_seconds or round(time.perf_counter() - self._comparison_started_at, 2)
+
+        self._sheets_text.set(str(result.summary.total_sheets_compared))
+        self._cells_text.set(str(result.summary.total_cells_compared))
+        self._raw_deviations_text.set(str(raw_count))
+        self._actionable_deviations_text.set(str(len(actionable_deviations)))
+        self._time_text.set(f"Comparison: {compare_elapsed:.2f} s")
+        self._output_text.set("Not saved yet")
+        self._raw_count_for_preview = raw_count
+        self._populate_preview(actionable_deviations)
 
         try:
-            comparator = WorkbookComparator(
-                project_workbook_path=project_path,
-                metadata=self._metadata,
-                progress_callback=self._progress_callback,
-            )
-            result = comparator.compare_sheets()
-            compare_elapsed = round(time.perf_counter() - start_time, 2)
-
-            self._sheets_text.set(str(result.summary.total_sheets_compared))
-            self._cells_text.set(str(result.summary.total_cells_compared))
-            self._deviations_text.set(str(result.summary.total_deviations_found))
-            self._time_text.set(f"Comparison: {compare_elapsed:.2f} s")
-            self._output_text.set("Not saved yet")
-            self._populate_preview(result.deviations)
-
             should_save = messagebox.askyesno(
                 "Save Deviation Report",
-                f"Comparison finished with {result.summary.total_deviations_found} deviations.\n\n"
+                f"Comparison finished with {len(actionable_deviations)} actionable deviations from {raw_count} raw differences.\n\n"
                 "Do you want to save the deviation report now?",
             )
             if not should_save:
@@ -2774,37 +3585,44 @@ class CompareTab:
 
             self._set_status("Creating deviation report...")
             save_start = time.perf_counter()
-            result.output_file = comparator.save_report(result, output_path)
-            total_elapsed = round(time.perf_counter() - start_time, 2)
+            result.output_file = self._report_generator.generate(result, output_path)
+            total_elapsed = round(time.perf_counter() - self._comparison_started_at, 2)
             save_elapsed = round(time.perf_counter() - save_start, 2)
             result.summary.execution_time_seconds = total_elapsed
 
             self._sheets_text.set(str(result.summary.total_sheets_compared))
             self._cells_text.set(str(result.summary.total_cells_compared))
-            self._deviations_text.set(str(result.summary.total_deviations_found))
+            self._raw_deviations_text.set(str(raw_count))
+            self._actionable_deviations_text.set(str(len(actionable_deviations)))
             self._time_text.set(f"Total: {total_elapsed:.2f} s (save: {save_elapsed:.2f} s)")
             self._output_text.set(result.output_file)
             self._set_status("Comparison completed successfully.")
-        except StandardMetadataError as exc:
-            logger.exception("Standard metadata validation failed.")
-            self._set_status(f"Error: {exc}")
-            messagebox.showerror("Comparison Failed", f"Standard metadata could not be loaded:\n{STANDARD_7_7_2_METADATA_FILE}\n\n{exc}")
-        except WorkbookLoadError as exc:
-            logger.exception("Workbook loading failed.")
-            self._set_status(f"Error: {exc}")
-            messagebox.showerror("Workbook Loading Failed", str(exc))
         except ComparisonError as exc:
-            logger.exception("Comparison failed.")
+            logger.exception("Report generation failed.")
             self._set_status(f"Error: {exc}")
             messagebox.showerror("Comparison Failed", str(exc))
         except Exception as exc:
-            logger.exception("Unexpected comparison failure.")
+            logger.exception("Unexpected report save failure.")
             self._set_status(f"Unexpected error: {exc}")
             messagebox.showerror("Comparison Failed", str(exc))
         finally:
-            if comparator is not None:
-                comparator.close_workbooks()
-            self._generate_btn.configure(state="normal")
+            self._finish_comparison_session()
+
+    def _on_generate(self) -> None:
+        if self._metadata is None:
+            messagebox.showerror("Comparison unavailable", self._metadata_error or "Standard workbook metadata could not be loaded.")
+            return
+
+        project_path = self._project_path.get().strip()
+        if not project_path:
+            messagebox.showwarning("Missing File", "Please select the project workbook first.")
+            return
+
+        if not os.path.exists(project_path):
+            messagebox.showerror("Missing File", f"Project workbook not found:\n{project_path}")
+            return
+
+        self._start_comparison(project_path)
 
 ========================================================================================================================
 FILE: app\ui\main_window.py | SIZE: 4.63 KB | ENCODING: utf-8-sig
@@ -2964,7 +3782,7 @@ FILE: data\excel_mapping.json | SIZE: 162 B | ENCODING: utf-8-sig
 }
 
 ========================================================================================================================
-FILE: data\metadata.json | SIZE: 125 B | ENCODING: utf-8-sig
+FILE: data\metadata.json | SIZE: 123 B | ENCODING: utf-8-sig
 ========================================================================================================================
 
 {
@@ -23432,25 +24250,113 @@ FILE: data\train_type_variants\LightDiesel.json | SIZE: 98.16 KB | ENCODING: utf
 }
 
 ========================================================================================================================
-FILE: tests\test_core.py | SIZE: 15.40 KB | ENCODING: utf-8-sig
+FILE: legacy\developer_utility\create_template.py | SIZE: 2.05 KB | ENCODING: utf-8-sig
+========================================================================================================================
+
+"""
+Run this script once to create templates/train_type_template.xlsx.
+
+Usage:
+    python legacy/developer_utility/create_template.py
+"""
+import os
+
+import openpyxl
+from openpyxl.styles import Alignment, Font, PatternFill
+
+TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "templates")
+OUTPUT_PATH = os.path.join(TEMPLATES_DIR, "train_type_template.xlsx")
+
+HEADER_FILL = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+HEADER_FONT = Font(color="FFFFFF", bold=True, size=11)
+LABEL_FONT = Font(bold=True, size=10)
+LABEL_FILL = PatternFill(start_color="D6E4F0", end_color="D6E4F0", fill_type="solid")
+CENTER = Alignment(horizontal="center", vertical="center")
+
+ROWS = [
+    ("A1", "Parameter", "B1", "Value"),
+    ("A2", "Max Speed (km/h)", "B2", ""),
+    ("A3", "Traction Type", "B3", ""),
+    ("A4", "Axle Load (t)", "B4", ""),
+    ("A5", "Length (m)", "B5", ""),
+    ("A6", "Passenger Capacity", "B6", ""),
+    ("A7", "Power (kW)", "B7", ""),
+    ("A8", "Braking Distance (m)", "B8", ""),
+    ("A9", "Bogies Count", "B9", ""),
+    ("A10", "Gauge (mm)", "B10", ""),
+    ("A11", "Notes", "B11", ""),
+]
+
+
+def build_template() -> None:
+    os.makedirs(TEMPLATES_DIR, exist_ok=True)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Train Type"
+
+    ws.column_dimensions["A"].width = 28
+    ws.column_dimensions["B"].width = 40
+
+    for label_cell, label_text, value_cell, value_text in ROWS:
+        lc = ws[label_cell]
+        lc.value = label_text
+        lc.alignment = CENTER
+
+        vc = ws[value_cell]
+        vc.value = value_text
+        vc.alignment = CENTER
+
+        if label_cell == "A1":
+            lc.font = HEADER_FONT
+            lc.fill = HEADER_FILL
+            vc.font = HEADER_FONT
+            vc.fill = HEADER_FILL
+        else:
+            lc.font = LABEL_FONT
+            lc.fill = LABEL_FILL
+
+    wb.save(OUTPUT_PATH)
+    wb.close()
+    print(f"Template created: {OUTPUT_PATH}")
+
+
+if __name__ == "__main__":
+    build_template()
+
+========================================================================================================================
+FILE: tests\test_core.py | SIZE: 39.85 KB | ENCODING: utf-8-sig
 ========================================================================================================================
 
 import tempfile
 import unittest
 from pathlib import Path
 import json
+import queue
+import importlib.util
+from types import SimpleNamespace
+from unittest import mock
 
 import openpyxl
 
-from app.comparison.models import ComparisonSummary, DeviationRecord, WorkbookComparisonResult
+from app.comparison.deviation_policy import is_actionable, is_placeholder
+from app.comparison.compare_worker import (
+    ComparisonWorkerFailure,
+    ComparisonWorkerProgress,
+    ComparisonWorkerSuccess,
+    run_comparison_worker,
+)
+from app.comparison.models import ComparisonSummary, DeviationRecord, ReportGenerationError, WorkbookComparisonResult
 from app.comparison.passive_rules_parser import PassiveRulesParser
 from app.comparison.report_generator import ReportGenerator
 from app.comparison.standard_metadata import StandardWorkbookMetadata
 from app.comparison.workbook_comparator import WorkbookComparator
+from app.config import STANDARD_7_7_2_METADATA_FILE, STANDARD_7_7_2_WORKBOOK
 from app.models.train_type import DataValidationError, ExcelMappingEntry, TrainTypeValues
+from app.services.data_update_service import DataUpdateService
 from app.services.rebuild import RebuildService, TrainTypeVariant
 from app.services.excel_generator import ExcelGenerator
 from app.services.train_type_service import TrainTypeService
+from app.comparison.models import WorkbookLoadError
 
 
 class FakeRepository:
@@ -23520,7 +24426,10 @@ class ServiceAndGeneratorTests(unittest.TestCase):
                 excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE = original_template_file
 
             generated_workbook = openpyxl.load_workbook(output_path)
-            self.assertEqual(generated_workbook["Train Type"]["B2"].value, 160)
+            try:
+                self.assertEqual(generated_workbook["Train Type"]["B2"].value, 160)
+            finally:
+                generated_workbook.close()
 
     def test_excel_generator_writes_values_using_parameter_column_mapping(self) -> None:
         repository = FakeRepository(
@@ -23560,7 +24469,184 @@ class ServiceAndGeneratorTests(unittest.TestCase):
                 excel_generator_module.TRAIN_TYPE_TEMPLATE_FILE = original_template_file
 
             generated_workbook = openpyxl.load_workbook(output_path)
-            self.assertEqual(generated_workbook["Train type (2)"]["E11"].value, "GENERIC_X")
+            try:
+                self.assertEqual(generated_workbook["Train type (2)"]["E11"].value, "GENERIC_X")
+            finally:
+                generated_workbook.close()
+
+
+class MetadataAndPersistenceTests(unittest.TestCase):
+    def test_embedded_standard_metadata_matches_workbook_filename(self) -> None:
+        metadata = StandardWorkbookMetadata.load(STANDARD_7_7_2_METADATA_FILE)
+
+        self.assertTrue(Path(STANDARD_7_7_2_WORKBOOK).exists())
+        self.assertEqual(Path(STANDARD_7_7_2_WORKBOOK).name, metadata.workbook_file)
+        self.assertEqual(Path(metadata.workbook_path).name, Path(STANDARD_7_7_2_WORKBOOK).name)
+
+    def test_data_update_service_writes_valid_json_atomically(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata_file = temp_path / "metadata.json"
+            metadata_file.write_text(
+                json.dumps({
+                    "schema_version": "1.0",
+                    "description": "Train Type Data Preparation Tool metadata",
+                    "generation_history": [],
+                }),
+                encoding="utf-8",
+            )
+
+            import app.services.data_update_service as data_update_module
+
+            original_metadata_file = data_update_module.METADATA_FILE
+            data_update_module.METADATA_FILE = str(metadata_file)
+            try:
+                service = DataUpdateService()
+                service.record_generation_event("Generic", "C:/Temp/output.xlsx")
+
+                with metadata_file.open(encoding="utf-8") as file_obj:
+                    metadata = json.load(file_obj)
+
+                self.assertEqual(metadata["schema_version"], "1.0")
+                self.assertEqual(metadata["description"], "Train Type Data Preparation Tool metadata")
+                self.assertEqual(len(metadata["generation_history"]), 1)
+                self.assertEqual(metadata["generation_history"][0]["train_type"], "Generic")
+                self.assertEqual(metadata["generation_history"][0]["output_path"], "C:/Temp/output.xlsx")
+                self.assertEqual(len(list(temp_path.iterdir())), 1)
+            finally:
+                data_update_module.METADATA_FILE = original_metadata_file
+
+    def test_data_update_service_cleans_temporary_file_on_replace_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata_file = temp_path / "metadata.json"
+            metadata_file.write_text(
+                json.dumps({
+                    "schema_version": "1.0",
+                    "description": "Train Type Data Preparation Tool metadata",
+                    "generation_history": [],
+                }),
+                encoding="utf-8",
+            )
+
+            import app.services.data_update_service as data_update_module
+
+            original_metadata_file = data_update_module.METADATA_FILE
+            data_update_module.METADATA_FILE = str(metadata_file)
+            try:
+                service = DataUpdateService()
+                with mock.patch.object(data_update_module.os, "replace", side_effect=OSError("replace failed")):
+                    with self.assertRaises(OSError):
+                        service.record_generation_event("Generic", "C:/Temp/output.xlsx")
+
+                with metadata_file.open(encoding="utf-8") as file_obj:
+                    metadata = json.load(file_obj)
+
+                self.assertEqual(metadata["generation_history"], [])
+                self.assertEqual(list(temp_path.iterdir()), [metadata_file])
+            finally:
+                data_update_module.METADATA_FILE = original_metadata_file
+
+
+class ComparisonWorkerTests(unittest.TestCase):
+    def test_worker_posts_success_and_progress_messages(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = StandardWorkbookMetadata(
+                standard_id="test_standard",
+                display_name="Test Standard",
+                baseline="7.7.2",
+                train_type="Generic",
+                workbook_file="standard.xlsm",
+                read_only=True,
+                precalculated=True,
+                password="",
+                compare={},
+                passive_rules={},
+                report_columns=[],
+                user_warning="",
+                source_path=str(temp_path / "standard_metadata.json"),
+            )
+
+            class FakeComparator:
+                last_instance = None
+
+                def __init__(self, project_workbook_path: str, metadata: StandardWorkbookMetadata, progress_callback) -> None:
+                    self.project_workbook_path = project_workbook_path
+                    self.metadata = metadata
+                    self.progress_callback = progress_callback
+                    self.closed = False
+                    FakeComparator.last_instance = self
+                    self.progress_callback("Loading standard workbook...")
+
+                def compare_sheets(self) -> WorkbookComparisonResult:
+                    self.progress_callback("Comparing cells...")
+                    return WorkbookComparisonResult(
+                        deviations=[],
+                        summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=2, total_deviations_found=0),
+                    )
+
+                def close_workbooks(self) -> None:
+                    self.closed = True
+
+            message_queue: queue.Queue = queue.Queue()
+            run_comparison_worker("project.xlsm", metadata, message_queue, comparator_factory=FakeComparator)
+
+            messages = []
+            while not message_queue.empty():
+                messages.append(message_queue.get_nowait())
+
+            self.assertIsInstance(messages[0], ComparisonWorkerProgress)
+            self.assertEqual(messages[0].message, "Loading standard workbook...")
+            self.assertIsInstance(messages[1], ComparisonWorkerProgress)
+            self.assertEqual(messages[1].message, "Comparing cells...")
+            self.assertIsInstance(messages[-1], ComparisonWorkerSuccess)
+            self.assertEqual(messages[-1].result.summary.total_cells_compared, 2)
+            self.assertTrue(FakeComparator.last_instance.closed)
+
+    def test_worker_posts_failure_message_and_closes_workbooks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = StandardWorkbookMetadata(
+                standard_id="test_standard",
+                display_name="Test Standard",
+                baseline="7.7.2",
+                train_type="Generic",
+                workbook_file="standard.xlsm",
+                read_only=True,
+                precalculated=True,
+                password="",
+                compare={},
+                passive_rules={},
+                report_columns=[],
+                user_warning="",
+                source_path=str(temp_path / "standard_metadata.json"),
+            )
+
+            class FakeComparator:
+                last_instance = None
+
+                def __init__(self, project_workbook_path: str, metadata: StandardWorkbookMetadata, progress_callback) -> None:
+                    self.closed = False
+                    FakeComparator.last_instance = self
+
+                def compare_sheets(self):
+                    raise WorkbookLoadError("failed to load workbook")
+
+                def close_workbooks(self) -> None:
+                    self.closed = True
+
+            message_queue: queue.Queue = queue.Queue()
+            run_comparison_worker("project.xlsm", metadata, message_queue, comparator_factory=FakeComparator)
+
+            messages = []
+            while not message_queue.empty():
+                messages.append(message_queue.get_nowait())
+
+            self.assertIsInstance(messages[-1], ComparisonWorkerFailure)
+            self.assertEqual(messages[-1].error_kind, "workbook_load")
+            self.assertIsInstance(messages[-1].exception, WorkbookLoadError)
+            self.assertTrue(FakeComparator.last_instance.closed)
 
 
 class RebuildServiceTests(unittest.TestCase):
@@ -23594,11 +24680,37 @@ class RebuildServiceTests(unittest.TestCase):
             service.generate_excel("Generic", str(output_path))
 
             workbook = openpyxl.load_workbook(output_path)
-            worksheet = workbook["IMU"]
-            self.assertEqual(worksheet["A1"].value, "Header")
-            self.assertEqual(worksheet["B2"].value, 123)
-            self.assertEqual(worksheet.column_dimensions["A"].width, 22)
-            self.assertEqual(worksheet.row_dimensions[1].height, 30)
+            try:
+                worksheet = workbook["IMU"]
+                self.assertEqual(worksheet["A1"].value, "Header")
+                self.assertEqual(worksheet["B2"].value, 123)
+                self.assertEqual(worksheet.column_dimensions["A"].width, 22)
+                self.assertEqual(worksheet.row_dimensions[1].height, 30)
+            finally:
+                workbook.close()
+
+    def test_rebuild_service_rejects_serialized_openpyxl_objects(self) -> None:
+        service = RebuildService()
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            variant_path = temp_path / "variant.json"
+            variant_data = {
+                "sheet_name": "IMU",
+                "cells": {
+                    "A1": {"value": "<openpyxl.cell.cell.Cell object at 0x123>"},
+                },
+                "column_widths": {},
+                "row_heights": {},
+                "merged_cells": [],
+            }
+            variant_path.write_text(json.dumps(variant_data), encoding="utf-8")
+            service._variants = {  # type: ignore[attr-defined]
+                "Generic": TrainTypeVariant("Generic", str(variant_path))
+            }
+
+            with self.assertRaises(ValueError):
+                service._load_variant_json("Generic")  # type: ignore[attr-defined]
 
 
 class WorkbookComparatorTests(unittest.TestCase):
@@ -23670,17 +24782,297 @@ class WorkbookComparatorTests(unittest.TestCase):
 
             report_wb = openpyxl.load_workbook(result.output_file)
             try:
-                report_ws = report_wb["List of Project Deviations"]
-                rows = list(report_ws.iter_rows(min_row=2, values_only=True))
-                self.assertIn((1, "Project Only", "-", "Missing", "Exists", None, None), rows)
-                self.assertIn((2, "Standard Only", "-", "Exists", "Missing", None, None), rows)
-                self.assertIn((3, "Visible Sheet", "B2", "STANDARD", "PROJECT", None, None), rows)
+                self.assertEqual(report_wb.sheetnames, ["Summary", "List of Project Deviations", "All Cell Differences"])
+
+                summary_ws = report_wb["Summary"]
+                self.assertEqual(summary_ws["B16"].value, "Sheet")
+                self.assertEqual(summary_ws["C16"].value, "Raw differences")
+                self.assertEqual(summary_ws["D16"].value, "Actionable differences")
+                self.assertEqual(summary_ws["E16"].value, "Passive Rules mapped")
+
+                actionable_ws = report_wb["List of Project Deviations"]
+                raw_ws = report_wb["All Cell Differences"]
+
+                self.assertEqual(actionable_ws.title, "List of Project Deviations")
+                self.assertEqual(raw_ws.title, "All Cell Differences")
+
+                actionable_rows = list(actionable_ws.iter_rows(min_row=5, values_only=True))
+                raw_rows = list(raw_ws.iter_rows(min_row=5, values_only=True))
+
+                self.assertEqual(len(actionable_rows), 3)
+                self.assertEqual(len(raw_rows), 3)
+                self.assertCountEqual(
+                    actionable_rows,
+                    [
+                        (1, "Project Only", "-", "Missing", "Exists", None, None),
+                        (2, "Standard Only", "-", "Exists", "Missing", None, None),
+                        (3, "Visible Sheet", "B2", "STANDARD", "PROJECT", None, None),
+                    ],
+                )
+                self.assertCountEqual(raw_rows, actionable_rows)
             finally:
                 report_wb.close()
 
 
 class ReportGeneratorTests(unittest.TestCase):
-    def test_report_generator_writes_v4_headers(self) -> None:
+    def _build_report_result(self, deviations: list[DeviationRecord], total_cells: int = 1) -> WorkbookComparisonResult:
+        return WorkbookComparisonResult(
+            deviations=deviations,
+            summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=total_cells, total_deviations_found=len(deviations)),
+            standard_display_name="Test Standard",
+            standard_workbook_file="standard.xlsm",
+            project_workbook_file="project.xlsm",
+        )
+
+    def test_report_generator_closes_workbook_after_successful_save(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = StandardWorkbookMetadata(
+                standard_id="test_standard",
+                display_name="Test Standard",
+                baseline="7.7.2",
+                train_type="Generic",
+                workbook_file="standard.xlsm",
+                read_only=True,
+                precalculated=True,
+                password="",
+                compare={"report_sheet_name": "List of Project Deviations"},
+                passive_rules={},
+                report_columns=[
+                    "Change No",
+                    "Sheet",
+                    "Cell",
+                    "Standard Value",
+                    "Project Value",
+                    "Parameter",
+                    "Rule",
+                ],
+                user_warning="",
+                source_path=str(temp_path / "standard_metadata.json"),
+            )
+
+            fake_workbook = SimpleNamespace(
+                active=object(),
+                properties=SimpleNamespace(title=None, subject=None, creator=None),
+                remove=mock.MagicMock(),
+                save=mock.MagicMock(),
+                close=mock.MagicMock(),
+            )
+
+            with mock.patch("app.comparison.report_generator.Workbook", return_value=fake_workbook), \
+                mock.patch.object(ReportGenerator, "_configure_summary_sheet", return_value=None), \
+                mock.patch.object(ReportGenerator, "_write_deviation_sheet", return_value=None):
+                output_path = temp_path / "Workbook_Deviations.xlsx"
+                result = self._build_report_result([])
+                ReportGenerator(metadata).generate(result, str(output_path))
+
+            self.assertTrue(fake_workbook.save.called)
+            self.assertTrue(fake_workbook.close.called)
+
+    def test_report_generator_closes_workbook_after_save_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = StandardWorkbookMetadata(
+                standard_id="test_standard",
+                display_name="Test Standard",
+                baseline="7.7.2",
+                train_type="Generic",
+                workbook_file="standard.xlsm",
+                read_only=True,
+                precalculated=True,
+                password="",
+                compare={"report_sheet_name": "List of Project Deviations"},
+                passive_rules={},
+                report_columns=[
+                    "Change No",
+                    "Sheet",
+                    "Cell",
+                    "Standard Value",
+                    "Project Value",
+                    "Parameter",
+                    "Rule",
+                ],
+                user_warning="",
+                source_path=str(temp_path / "standard_metadata.json"),
+            )
+
+            fake_workbook = SimpleNamespace(
+                active=object(),
+                properties=SimpleNamespace(title=None, subject=None, creator=None),
+                remove=mock.MagicMock(),
+                save=mock.MagicMock(side_effect=RuntimeError("save failed")),
+                close=mock.MagicMock(),
+            )
+
+            with mock.patch("app.comparison.report_generator.Workbook", return_value=fake_workbook), \
+                mock.patch.object(ReportGenerator, "_configure_summary_sheet", return_value=None), \
+                mock.patch.object(ReportGenerator, "_write_deviation_sheet", return_value=None):
+                result = self._build_report_result([])
+                with self.assertRaises(ReportGenerationError):
+                    ReportGenerator(metadata).generate(result, str(temp_path / "Workbook_Deviations.xlsx"))
+
+            self.assertTrue(fake_workbook.close.called)
+
+    def test_export_tool_resolves_repo_root_and_writes_review_export(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "export_full_repo",
+            str(Path(__file__).resolve().parents[1] / "tools" / "export_full_repo.py"),
+        )
+        self.assertIsNotNone(spec)
+        assert spec and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        temp_root = Path(tempfile.mkdtemp())
+        try:
+            (temp_root / "tools").mkdir()
+            (temp_root / "sample.txt").write_text("hello", encoding="utf-8")
+            (temp_root / "tools" / "export_full_repo.py").write_text("# placeholder", encoding="utf-8")
+
+            self.assertEqual(module.resolve_repo_root(temp_root / "tools" / "export_full_repo.py"), temp_root)
+
+            output_path = temp_root / "repo_full_export.txt"
+            module.export_repository(temp_root, output_path)
+            content = output_path.read_text(encoding="utf-8")
+            self.assertIn("# sample.txt", content)
+            self.assertIn("hello", content)
+        finally:
+            for child in sorted(temp_root.rglob("*"), reverse=True):
+                if child.is_file():
+                    child.unlink()
+                elif child.is_dir():
+                    child.rmdir()
+            temp_root.rmdir()
+
+    def test_report_generator_formats_float_values_for_presentation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = StandardWorkbookMetadata(
+                standard_id="test_standard",
+                display_name="Test Standard",
+                baseline="7.7.2",
+                train_type="Generic",
+                workbook_file="standard.xlsm",
+                read_only=True,
+                precalculated=True,
+                password="",
+                compare={"report_sheet_name": "List of Project Deviations"},
+                passive_rules={},
+                report_columns=[
+                    "Change No",
+                    "Sheet",
+                    "Cell",
+                    "Standard Value",
+                    "Project Value",
+                    "Parameter",
+                    "Rule",
+                ],
+                user_warning="",
+                source_path=str(temp_path / "standard_metadata.json"),
+            )
+            result = self._build_report_result([
+                DeviationRecord(
+                    change_type="Value Changed",
+                    sheet_name="Train type",
+                    cell_address="E412",
+                    standard_value=9.071999999999999,
+                    project_value=10.071999999999999,
+                    parameter="Param A",
+                    rule="Rule 1",
+                )
+            ])
+
+            output_path = temp_path / "Workbook_Deviations.xlsx"
+            ReportGenerator(metadata).generate(result, str(output_path))
+
+            report_wb = openpyxl.load_workbook(output_path)
+            try:
+                sheet = report_wb["List of Project Deviations"]
+                self.assertIsInstance(sheet["D5"].value, float)
+                self.assertEqual(sheet["D5"].number_format, "0.###############")
+                self.assertIsInstance(sheet["E5"].value, float)
+                self.assertEqual(sheet["E5"].number_format, "0.###############")
+            finally:
+                report_wb.close()
+
+    def test_report_generator_writes_three_sheet_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            metadata = StandardWorkbookMetadata(
+                standard_id="test_standard",
+                display_name="Test Standard",
+                baseline="7.7.2",
+                train_type="Generic",
+                workbook_file="standard.xlsm",
+                read_only=True,
+                precalculated=True,
+                password="",
+                compare={"report_sheet_name": "List of Project Deviations"},
+                passive_rules={},
+                report_columns=[
+                    "Change No",
+                    "Sheet",
+                    "Cell",
+                    "Standard Value",
+                    "Project Value",
+                    "Parameter",
+                    "Rule",
+                ],
+                user_warning="",
+                source_path=str(temp_path / "standard_metadata.json"),
+            )
+            result = self._build_report_result([
+                DeviationRecord(
+                    change_type="Value Changed",
+                    sheet_name="Train type",
+                    cell_address="E412",
+                    standard_value="2.0",
+                    project_value="2.4",
+                    parameter="Param A",
+                    rule="Rule 1",
+                )
+            ])
+
+            generator = ReportGenerator(metadata)
+            output_path = temp_path / "Workbook_Deviations.xlsx"
+            generator.generate(result, str(output_path))
+
+            report_wb = openpyxl.load_workbook(output_path)
+            try:
+                self.assertEqual(report_wb.sheetnames, ["Summary", "List of Project Deviations", "All Cell Differences"])
+
+                summary_ws = report_wb["Summary"]
+                self.assertEqual(summary_ws["C5"].value, "Test Standard")
+                self.assertEqual(summary_ws["B10"].value, 1)
+                self.assertFalse(summary_ws.sheet_view.showGridLines)
+                self.assertEqual(summary_ws.freeze_panes, "A8")
+                self.assertEqual(summary_ws.column_dimensions["B"].width, 32)
+                self.assertEqual(list(summary_ws.tables.keys()), ["SummaryBySheet"])
+                self.assertTrue(summary_ws.sheet_properties.tabColor is not None)
+                self.assertEqual(summary_ws.sheet_properties.tabColor.rgb[-6:], "1F4E78")
+
+                actionable_ws = report_wb["List of Project Deviations"]
+                raw_ws = report_wb["All Cell Differences"]
+
+                actionable_headers = [cell.value for cell in actionable_ws[4]]
+                raw_headers = [cell.value for cell in raw_ws[4]]
+                expected_headers = ["Change No", "Sheet", "Cell", "Standard Value", "Project Value", "Parameter", "Rule"]
+                self.assertEqual(actionable_headers, expected_headers)
+                self.assertEqual(raw_headers, expected_headers)
+                self.assertEqual(actionable_ws.freeze_panes, "A5")
+                self.assertEqual(raw_ws.freeze_panes, "A5")
+                self.assertFalse(actionable_ws.sheet_view.showGridLines)
+                self.assertFalse(raw_ws.sheet_view.showGridLines)
+                self.assertEqual(actionable_ws.column_dimensions["A"].width, 12)
+                self.assertEqual(raw_ws.column_dimensions["A"].width, 12)
+                self.assertEqual(list(actionable_ws.tables.keys()), ["ActionableDeviationsTable"])
+                self.assertEqual(list(raw_ws.tables.keys()), ["AllCellDifferencesTable"])
+                self.assertEqual(actionable_ws.sheet_properties.tabColor.rgb[-6:], "70AD47")
+                self.assertEqual(raw_ws.sheet_properties.tabColor.rgb[-6:], "A5A5A5")
+            finally:
+                report_wb.close()
+
+    def test_report_generator_styles_sorted_rows_correctly(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             metadata = StandardWorkbookMetadata(
@@ -23710,15 +25102,27 @@ class ReportGeneratorTests(unittest.TestCase):
                 deviations=[
                     DeviationRecord(
                         change_type="Value Changed",
-                        sheet_name="Train type",
-                        cell_address="E412",
-                        standard_value="2.0",
-                        project_value="2.4",
+                        sheet_name="Zeta",
+                        cell_address="A1",
+                        standard_value="1",
+                        project_value="2",
+                        parameter="",
+                        rule="",
+                    ),
+                    DeviationRecord(
+                        change_type="Value Changed",
+                        sheet_name="Alpha",
+                        cell_address="A1",
+                        standard_value="1",
+                        project_value="2",
                         parameter="Param A",
                         rule="Rule 1",
-                    )
+                    ),
                 ],
-                summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=1, total_deviations_found=1),
+                summary=ComparisonSummary(total_sheets_compared=1, total_cells_compared=2, total_deviations_found=2),
+                standard_display_name="Test Standard",
+                standard_workbook_file="standard.xlsm",
+                project_workbook_file="project.xlsm",
             )
 
             generator = ReportGenerator(metadata)
@@ -23726,12 +25130,49 @@ class ReportGeneratorTests(unittest.TestCase):
             generator.generate(result, str(output_path))
 
             report_wb = openpyxl.load_workbook(output_path)
-            report_ws = report_wb["List of Project Deviations"]
-            headers = [cell.value for cell in report_ws[1]]
-            self.assertEqual(
-                headers,
-                ["Change No", "Sheet", "Cell", "Standard Value", "Project Value", "Parameter", "Rule"],
-            )
+            try:
+                worksheet = report_wb["List of Project Deviations"]
+
+                def fill_suffix(cell_ref: str) -> str:
+                    color = worksheet[cell_ref].fill.fgColor
+                    if color.type == "rgb" and color.rgb:
+                        return color.rgb[-6:]
+                    self.fail(f"Expected rgb fill on {cell_ref}, got {color.type}:{color.value}")
+
+                self.assertEqual(worksheet["B5"].value, "Alpha")
+                self.assertEqual(worksheet["B6"].value, "Zeta")
+                self.assertEqual(fill_suffix("F5"), "E2F0D9")
+                self.assertEqual(fill_suffix("G5"), "E2F0D9")
+                self.assertEqual(fill_suffix("D6"), "FFF2CC")
+                self.assertEqual(fill_suffix("E6"), "FFF2CC")
+            finally:
+                report_wb.close()
+
+    def test_deviation_policy_marks_placeholders_and_actionable_rows(self) -> None:
+        placeholder = DeviationRecord(
+            change_type="Value Changed",
+            sheet_name="Train type",
+            cell_address="A1",
+            standard_value="-",
+            project_value="123",
+            parameter="",
+            rule="",
+        )
+        actionable = DeviationRecord(
+            change_type="Value Changed",
+            sheet_name="Train type",
+            cell_address="A1",
+            standard_value="1",
+            project_value="2",
+            parameter="Param",
+            rule="Rule",
+        )
+
+        self.assertTrue(is_placeholder("-"))
+        self.assertTrue(is_placeholder(None))
+        self.assertFalse(is_placeholder("123"))
+        self.assertFalse(is_actionable(placeholder))
+        self.assertTrue(is_actionable(actionable))
 
 
 class PassiveRulesParserTests(unittest.TestCase):
@@ -23814,10 +25255,6 @@ Path: DE18-ALS-DES-D000-ATC-D00058-00001_20260224_Step7 (1).xlsm
 Size: 6.68 MB (7001541 bytes)
 SHA-256: 715c0417737d11c461881c60bfcdc3d43c138244b60839a2a1a1dad034cabdb1
 --------------------------------------------------------------------------------
-Path: ENIO-ALS-SA11-D400-REG-000030_Di4_STEP7_20260709.xlsm
-Size: 6.65 MB (6973120 bytes)
-SHA-256: d670fa58a6a48b6b7e8eed0167e83a2f26a1b25819215e774da72f0efe49f8c5
---------------------------------------------------------------------------------
 Path: ENIO-ALS-SA11-D400-REG-000030_Di4_STEP7_20260709_UNLOCKED.xlsm
 Size: 6.31 MB (6616821 bytes)
 SHA-256: c90ee2e90ac059f5e41a93fe3f08b0c71a944d70650f2eab878a66ef8a773e18
@@ -23826,33 +25263,9 @@ Path: GATC_CRL_DESG_0926_v15_Clean (1).docx
 Size: 527.83 KB (540496 bytes)
 SHA-256: acbee0611bedff7af711b3c3189ac28b1fd9e7c37ad0c6014a2b5e9e789620d6
 --------------------------------------------------------------------------------
-Path: GDPP_EVC_new_decode_Templ_with_FP_TRB_7.7.2_RC.xlsm
-Size: 5.97 MB (6259045 bytes)
-SHA-256: 5d29438705af5084c959d544b5a55d7e7232db87c9d5815fe22ad3d5d5b66be3
---------------------------------------------------------------------------------
-Path: TrainType.xlsx
-Size: 115.19 KB (117955 bytes)
-SHA-256: 01627bc188ee51bb11e53a3741a476ec200335b126d520aabd84a3fece2d31b3
---------------------------------------------------------------------------------
-Path: Workbook_Deviations.xlsx
-Size: 221.02 KB (226322 bytes)
-SHA-256: 74d3973207e6357ad78366a296cfddffeadb81dcdfacd5105255a83b6c7bfbb2
---------------------------------------------------------------------------------
-Path: standard_7_7_2.xlsm
-Size: 6.12 MB (6420412 bytes)
-SHA-256: eb1664293362b3aedef3faafebda9237b72117409295808c893424293c0f7e82
---------------------------------------------------------------------------------
 Path: standard_7_7_2_precalculated_UNLOCKED.xlsm
 Size: 6.12 MB (6412462 bytes)
 SHA-256: 3a5d624a4fdf0c4cee6b9b0305ca9cdb6b9fd3c3432ddd795fcaa52279098133
---------------------------------------------------------------------------------
-Path: standard_7_7_2_unprotected.xlsm
-Size: 6.12 MB (6420737 bytes)
-SHA-256: f23d0716991c3f533e76f57d53214202abeeeb234315faef09017e064242fa56
---------------------------------------------------------------------------------
-Path: standard_7_7_2_unprotected_UNLOCKED.xlsm
-Size: 6.11 MB (6410823 bytes)
-SHA-256: 63e36ff29a29188876438ab57937d031fadbf861debb78ca5a701dd04d91a898
 --------------------------------------------------------------------------------
 Path: ~$DE18-ALS-DES-D000-ATC-D00058-00001_20260224_Step7 (1).xlsm
 Size: 165 B (165 bytes)
@@ -23861,10 +25274,6 @@ SHA-256: 181b7cdc4596d074270b3d5c45efe05df25cfd6252524423982e48781d73a180
 Path: ~$TC_CRL_DESG_0926_v15_Clean (1).docx
 Size: 162 B (162 bytes)
 SHA-256: 8c739c84078cbfecd3a286c064de971b8443ed290446d485694d72f91904c5e0
---------------------------------------------------------------------------------
-Path: ~$Workbook_Deviations.xlsx
-Size: 165 B (165 bytes)
-SHA-256: [HASH ERROR: [Errno 13] Permission denied: 'C:\\Python\\data_prep_tool\\~$Workbook_Deviations.xlsx']
 --------------------------------------------------------------------------------
 Path: data\standards\7_7_2\standard_7_7_2_precalculated_UNLOCKED.xlsm
 Size: 6.12 MB (6412462 bytes)
@@ -23879,9 +25288,9 @@ SHA-256: 01627bc188ee51bb11e53a3741a476ec200335b126d520aabd84a3fece2d31b3
 EXPORT SUMMARY
 ========================================================================================================================
 
-Total discovered files: 56
-Text files exported: 40
+Total discovered files: 52
+Text files exported: 44
 Text read failures: 0
-Binary files inventoried: 16
-Binary hash failures: 1
-Export status: COMPLETED WITH WARNINGS
+Binary files inventoried: 8
+Binary hash failures: 0
+Export status: SUCCESS
