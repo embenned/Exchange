@@ -1,0 +1,264 @@
+GITHUB COPILOT TASK: FIX GUI FREEZE AND SAFE APPLICATION SHUTDOWN AFTER REPORT EXPORT
+
+Work in the current repository after legacy cleanup. This is a focused bug fix. Do not redesign the application, comparison algorithm, report appearance, workbook data, or project structure.
+
+OBSERVED BUG
+After the comparison finishes and the user chooses where to save the Excel deviation report, the application appears to wait indefinitely. The window cannot be closed normally. Clicking the X causes Windows to display that the program is not responding.
+
+LIKELY TECHNICAL CAUSE TO VERIFY
+The comparison itself already runs in a worker thread, but ReportGenerator.generate(...) is still called synchronously from CompareTab on the Tkinter main thread after the save dialog. Generating and saving a report with thousands of rows, tables, styles, borders, and conditional formatting can take a noticeable amount of time. While this method runs, Tkinter cannot process redraw events or the window-close event, so Windows classifies the application as unresponsive.
+
+Do not assume this is the only cause. Add timing logs around comparison completion, report workbook construction, workbook.save(), workbook.close(), queue delivery, and GUI session cleanup. Verify the actual blocking stage before finalizing the fix.
+
+NON-NEGOTIABLE RULES
+- Do not alter workbook comparison semantics.
+- Do not alter Passive Rules mapping.
+- Do not alter the report's three worksheets, values, headers, colors, tables, sorting, actionable filtering, or worksheet order.
+- Do not modify source project or standard workbooks.
+- Do not add asyncio, multiprocessing, external GUI frameworks, or dependencies.
+- Never access Tkinter widgets, StringVar, filedialog, or messagebox from a worker thread.
+- Do not use thread.kill, os._exit, sys.exit from a worker, or private CPython thread termination tricks.
+- Do not silently abandon a half-written report.
+- Preserve current typed comparison errors and existing tests.
+
+1. ESTABLISH THE FAILURE LOCATION
+Before changing behavior, inspect:
+- app/ui/compare_tab.py
+- app/comparison/compare_worker.py
+- app/comparison/report_generator.py
+- app/comparison/workbook_comparator.py
+- app/ui/main_window.py
+- main.py
+
+Run current tests first:
+python -m compileall .
+python -m unittest discover -s tests
+
+Add temporary or permanent INFO timing logs using time.perf_counter() around:
+- comparison worker start/end;
+- report generation start;
+- completion of Summary sheet;
+- completion of List of Project Deviations sheet;
+- completion of All Cell Differences sheet;
+- workbook.save start/end;
+- workbook.close start/end;
+- queue success/failure delivery;
+- CompareTab session finalization.
+
+Do not log workbook cell contents, passwords, or sensitive project data. Log only stage names, durations, row counts, and output filename.
+
+2. MOVE REPORT GENERATION AND SAVE OFF THE TKINTER MAIN THREAD
+The save dialog must remain on the main thread. After the user chooses output_path, start a dedicated report-save worker.
+
+Create or extend a small comparison worker module with typed queue messages. Prefer extending app/comparison/compare_worker.py instead of creating several new worker modules.
+
+Add message types equivalent to:
+- ReportSaveProgress(message: str)
+- ReportSaveSuccess(output_path: str, elapsed_seconds: float)
+- ReportSaveFailure(exception: Exception, error_kind: str)
+
+Add a pure worker entry point equivalent to:
+run_report_save_worker(
+    result: WorkbookComparisonResult,
+    metadata: StandardWorkbookMetadata,
+    output_path: str,
+    message_queue: queue.Queue[...],
+    report_generator_factory=ReportGenerator,
+) -> None
+
+Worker requirements:
+- create ReportGenerator inside the worker, or safely use a factory passed to the worker;
+- call ReportGenerator.generate(result, output_path);
+- send progress, success, or failure to the queue;
+- catch ReportGenerationError separately;
+- catch unexpected Exception only at the worker boundary;
+- never call Tkinter;
+- always return through a terminal queue message;
+- retain the exception object for logging/typed handling;
+- do not close or modify source workbooks, which should already be closed by the comparison worker.
+
+3. COMPARETAB STATE MACHINE
+Refactor CompareTab conservatively so the long operation has explicit states:
+- idle
+- comparing
+- awaiting_save_choice
+- saving_report
+- closing_requested
+
+An Enum is acceptable if it improves clarity. Do not create a generic state-machine framework.
+
+Replace ambiguous duplicated booleans where possible with one authoritative operation state. The Generate button must be disabled during comparing and saving_report, and enabled only when returning to idle.
+
+Required flow:
+1. User starts comparison.
+2. Comparison worker runs.
+3. Main thread receives ComparisonWorkerSuccess and updates preview/summary.
+4. Main thread displays askyesno and asksaveasfilename.
+5. If user cancels saving, return cleanly to idle.
+6. If user selects an output path, start report-save thread and return immediately to Tkinter mainloop.
+7. Main thread polls the report queue with root.after(100, ...).
+8. Progress updates the status label.
+9. Success updates output path, elapsed time, status, and shows success message.
+10. Failure shows a typed error and returns to idle.
+11. Session cleanup happens exactly once.
+
+Do not call _finish_comparison_session before report saving has completed. Rename the cleanup method to reflect all background operations, for example _finish_operation(). Ensure there is only one code path that restores the Generate button and clears thread/queue references.
+
+4. SAFE WINDOW CLOSE HANDLING
+Register one WM_DELETE_WINDOW handler on the root window, preferably in MainWindow because it owns the root. The handler must ask CompareTab whether a background operation is active.
+
+Implement a small public UI method on CompareTab, for example:
+- has_active_operation() -> bool
+- request_shutdown(on_ready: Callable[[], None]) -> None
+
+Required close behavior:
+
+A. If idle:
+- destroy the root immediately through the normal close path.
+
+B. If comparison is active:
+- show one confirmation dialog on the main thread:
+  "A workbook comparison is still running. Closing now will stop waiting for the result. No source workbook will be modified. Close the application?"
+- if user selects No, keep the application open;
+- if user selects Yes, mark closing_requested, disable user controls, stop scheduling new UI work except queue polling, and wait for the worker to finish its current cleanup;
+- because the comparison thread is daemonized and openpyxl work is not safely cancellable mid-read, do not attempt forced thread termination;
+- when the worker posts a terminal success/failure event, discard normal preview/dialog work, perform cleanup, then call on_ready to destroy the root;
+- add a bounded fallback timeout only for UI shutdown, for example 5 seconds. After the timeout, destroy the root without calling os._exit. Document that daemon workers terminate with the process. Do not block the Tkinter thread while waiting.
+
+C. If report saving is active:
+- do not immediately destroy the process because this can leave a partial .xlsx file;
+- show one confirmation/information dialog:
+  "The report is currently being saved. The application will close when saving finishes."
+- set closing_requested;
+- disable controls;
+- keep polling the queue;
+- when save succeeds or fails, perform cleanup and destroy root without showing additional modal dialogs;
+- do not use a short forced-close timeout while workbook.save is active. Protect file integrity.
+
+D. Avoid repeated dialogs:
+- if closing_requested is already true, a repeated click on X must not create another messagebox;
+- status should become "Closing after the current operation finishes...".
+
+5. REPORT GENERATOR RESOURCE SAFETY
+Verify ReportGenerator.generate closes its newly created Workbook in finally.
+
+Required pattern:
+- workbook: Workbook | None = None before try;
+- create workbook;
+- build sheets;
+- save;
+- return output path;
+- except wraps errors in ReportGenerationError with `raise ... from exc`;
+- finally closes workbook if it exists;
+- if close itself fails, log at DEBUG and do not hide the original exception.
+
+For additional output safety:
+- save the report to a temporary sibling path in the same destination directory, with an .xlsx extension;
+- after workbook.save(temp_path) succeeds and workbook is closed, atomically replace the requested output with os.replace(temp_path, output_path);
+- if generation/save fails, delete the temporary file if present;
+- do not write directly over the final report during construction;
+- preserve the final filename selected by the user.
+
+Because openpyxl identifies format from the extension, the temporary file must end with .xlsx.
+
+6. DO NOT HOLD SOURCE WORKBOOKS DURING SAVE DIALOG OR REPORT EXPORT
+Confirm the comparison worker closes standard and project workbooks in finally before sending its terminal success message.
+
+The WorkbookComparisonResult must contain ordinary Python values only. Report generation must not depend on live worksheet or workbook objects.
+
+Add a test proving comparator.close_workbooks() is called before ComparisonWorkerSuccess is consumed, or at minimum before the comparison worker function returns.
+
+7. MAIN WINDOW CLOSE PATH
+Inspect MainWindow.run() and any existing root protocol handling.
+
+There must be one clear close route:
+- WM_DELETE_WINDOW calls a MainWindow method;
+- MainWindow asks CompareTab to prepare shutdown;
+- when ready, MainWindow calls root.destroy();
+- main.py continues after mainloop exits and logs "Application closed.".
+
+Do not call root.quit() in one path and root.destroy() in another unless there is a documented reason. Prefer root.destroy() for final shutdown.
+
+If the Generate tab has no long operation, it can close immediately. If it can also save a workbook synchronously and block, do not broaden this task unless a reproduced freeze exists there.
+
+8. TESTS WITHOUT REAL TK DISPLAY
+Do not require a graphical display in unit tests.
+
+Add focused tests for:
+- report-save worker posts ReportSaveProgress and ReportSaveSuccess;
+- report-save worker posts ReportSaveFailure for ReportGenerationError;
+- report generator writes through a temporary sibling and atomically replaces final output;
+- temporary report is removed after save failure;
+- report workbook close is attempted on success and failure;
+- operation state returns to idle exactly once after terminal events;
+- closing_requested suppresses normal success/error dialogs;
+- closing during report save waits for terminal save event before invoking the supplied close callback;
+- repeated close requests do not invoke the callback or dialog multiple times.
+
+Extract small non-Tk helper/state logic if necessary for testing. Do not instantiate a real Tk root in automated tests.
+
+9. MANUAL VALIDATION SCENARIOS
+After unit tests, manually perform these scenarios:
+
+Scenario 1: Normal save
+- compare a real project workbook;
+- save the report;
+- verify the GUI remains responsive while the report is generated;
+- verify progress text changes;
+- verify success appears once;
+- verify the application can close normally afterward.
+
+Scenario 2: Close during comparison
+- start comparison;
+- click X;
+- select No and verify operation continues;
+- click X again, select Yes, and verify the application closes after safe cleanup without "Not responding".
+
+Scenario 3: Close during report save
+- choose report destination;
+- immediately click X;
+- verify the window says it will close after save;
+- verify the final .xlsx opens correctly after the process closes;
+- verify no temporary .xlsx remains.
+
+Scenario 4: Save failure
+- choose an unwritable destination or mock save failure;
+- verify an error appears once;
+- verify controls return to idle;
+- verify the application closes normally;
+- verify no partial final file or temporary file remains.
+
+Scenario 5: Cancel report save
+- finish comparison;
+- choose not to save or cancel the save dialog;
+- verify the Generate button is enabled again;
+- verify the application closes immediately.
+
+10. FINAL VALIDATION COMMANDS
+Run:
+python -m compileall .
+python -m unittest discover -s tests
+git diff --check
+git status --short
+
+Verify:
+- no Tkinter API is called from either worker;
+- the main thread is never blocked by join(), Event.wait(), sleep(), busy waiting, workbook.save(), or report construction;
+- no forced thread termination exists;
+- no modal dialog is shown from a worker;
+- report contents and formatting tests remain unchanged and pass;
+- source workbook files remain read-only and untouched;
+- final report is valid and temporary output is cleaned.
+
+11. FINAL RESPONSE FORMAT
+Report factual results:
+1. Confirmed cause of the freeze, with measured stage timings.
+2. Files changed.
+3. Thread and queue flow after the fix.
+4. Window-close behavior during idle, comparison, and saving.
+5. Tests added.
+6. Exact compileall and unittest results.
+7. Manual scenarios actually performed.
+8. Any requirement skipped and exact reason.
+
+Do not claim the freeze is fixed unless report saving has been manually tested with a real multi-thousand-row report. Do not change any unrelated feature.
