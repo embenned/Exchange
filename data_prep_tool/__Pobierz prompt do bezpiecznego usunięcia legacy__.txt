@@ -1,0 +1,290 @@
+GITHUB COPILOT TASK: SAFE REMOVAL OF THE REMAINING LEGACY GENERATION PATH
+
+Work in the current repository after the user manually removed the old repositories implementation. This is a dependency-cleanup task, not a redesign. The two currently working user features must continue to work exactly as they do now:
+
+1. Generate the IMU/Train Type workbook from the three JSON variants through RebuildService.
+2. Compare a user workbook with the embedded FastPrep 7.7.2 standard and generate the existing three-sheet deviation report.
+
+The user explicitly wants the obsolete legacy path removed completely. If a legacy file is removed, remove all imports, constants, runtime copying, README documentation, tests, build inputs, and directory references that existed only for that file. Do not recreate the deleted repositories package. Do not introduce replacement abstractions for removed legacy code.
+
+HARD SAFETY RULES
+- Inspect repository-wide references before deleting each item.
+- Use `git grep` for every candidate path, class, constant, and filename.
+- Do not delete anything used by main.py, MainWindow, CompareTab, RebuildService, app/comparison, the three variant JSON files, or the embedded standard.
+- Do not modify any existing workbook content.
+- Do not modify comparison semantics, Passive Rules behavior, report layout, colors, worksheet names, or actionable filtering.
+- Do not modify the contents of Generic.json, HeavyDiesel.json, or LightDiesel.json.
+- Do not modify standard_7_7_2_precalculated_UNLOCKED.xlsm or standard_metadata.json.
+- Do not add dependencies.
+- Do not create new repositories, services, facades, compatibility classes, or migration layers.
+- Do not preserve dead compatibility behavior “just in case”. The purpose of this task is to remove it cleanly.
+- If any candidate is still used by the active runtime path, do not delete it. Report the exact reference instead.
+
+STEP 1: ESTABLISH A CLEAN BASELINE
+Run before changes:
+
+python -m compileall .
+python -m unittest discover -s tests
+git status --short
+
+Record the exact results. If tests fail before changes, stop and report the existing failure instead of deleting more code.
+
+STEP 2: VERIFY THE ACTIVE RUNTIME GRAPH
+Confirm the active startup path is:
+
+main.py
+  -> ensure_runtime_assets
+  -> RebuildService
+  -> MainWindow
+  -> CompareTab / app.comparison
+
+Confirm that no active runtime file imports:
+- app.repositories
+- TrainTypeService
+- ExcelGenerator
+- TrainTypeValues
+- ExcelMappingEntry
+- BaseRepository
+- LocalJsonRepository
+- SharePointRepository
+
+Do not rely only on filenames. Run repository-wide searches for every symbol.
+
+STEP 3: COMPLETE REMOVAL OF THE DELETED REPOSITORIES PACKAGE
+The user already removed the repositories implementation and the current git diff still shows deletion of app/repositories/__init__.py.
+ Usuń też data/metadata.json I ogólnie historię generowania to niepotrzebne
+jeżeli usunąłeś DataUpdateService i nie chcesz żadnej historii generowania, wtedy można usunąć cały łańcuch:
+data/metadata.json
+app/services/data_update_service.py
+METADATA_FILE z config.py
+BUNDLED_METADATA_FILE z config.py
+kopiowanie metadata w runtime_assets.py
+wywołania DataUpdateService w main.py i MainWindow
+testy DataUpdateService
+opis historii w README
+Required behavior:
+- keep app/repositories deleted;
+- do not recreate app/repositories/__init__.py;
+- remove the now-empty app/repositories directory from disk if it remains;
+- confirm no import, README entry, test, config constant, typing annotation, or comment references app.repositories or Repository classes;
+- confirm `python -c "import app.repositories"` is not part of any documented workflow or test.
+
+STEP 4: REMOVE THE REMAINING LEGACY TEMPLATE PATH, BUT ONLY AFTER REFERENCE PROOF
+The current primary generator uses RebuildService plus:
+- data/train_type_variants/Generic.json
+- data/train_type_variants/HeavyDiesel.json
+- data/train_type_variants/LightDiesel.json
+
+The following are candidates for complete deletion because they belong to the old template/mapping path:
+- legacy/developer_utility/create_template.py
+- templates/train_type_template.xlsx
+- app/models/train_type.py
+- app/models/__init__.py and app/models directory if empty afterward
+
+Before deleting, run exact searches for:
+- `create_template`
+- `train_type_template.xlsx`
+- `TRAIN_TYPE_TEMPLATE_FILE`
+- `BUNDLED_TRAIN_TYPE_TEMPLATE_FILE`
+- `TEMPLATES_DIR`
+- `RESOURCE_TEMPLATES_DIR`
+- `TrainTypeValues`
+- `ExcelMappingEntry`
+- `DataValidationError`
+- `app.models`
+
+Delete each candidate only if all remaining references are limited to:
+- the candidate legacy files themselves;
+- README legacy documentation;
+- legacy-only tests;
+- legacy-only config/runtime asset constants;
+- build packaging of the templates directory.
+
+If the proof succeeds, perform all of these connected removals:
+
+A. Delete:
+- legacy/developer_utility/create_template.py
+- empty legacy/developer_utility and legacy directories
+- templates/train_type_template.xlsx
+- empty templates directory
+- app/models/train_type.py
+- app/models/__init__.py and empty app/models directory
+
+B. In app/config.py remove only legacy-template constants:
+- TEMPLATES_DIR
+- RESOURCE_TEMPLATES_DIR
+- TRAIN_TYPE_TEMPLATE_FILE
+- BUNDLED_TRAIN_TYPE_TEMPLATE_FILE
+
+Do not remove DATA_DIR, TRAIN_TYPE_VARIANTS_DIR, standard paths, metadata paths, or any constants used by active generation/comparison.
+
+C. In app/runtime_assets.py remove:
+- imports of the removed template constants;
+- creation of TEMPLATES_DIR;
+- copying of BUNDLED_TRAIN_TYPE_TEMPLATE_FILE to TRAIN_TYPE_TEMPLATE_FILE.
+
+Do not remove copying of the three active variant JSON files, standard metadata, or standard workbook.
+
+D. In build.ps1 remove:
+- `--add-data 'templates;templates'`
+
+Keep:
+- `--add-data 'data;data'`
+
+E. In README.md remove:
+- the legacy directory from the tree;
+- templates from the tree;
+- instructions for create_template.py;
+- references to TrainTypeService, ExcelGenerator, repositories, template mapping, or compatibility paths that no longer exist;
+- old mapping-mode documentation if it describes deleted excel_mapping/template behavior.
+
+Replace the generation explanation with the actual path only:
+- MainWindow calls RebuildService;
+- RebuildService reads one of the three variant JSON files;
+- RebuildService creates a new workbook and reconstructs the IMU worksheet.
+
+F. In tests remove tests that exist only for:
+- TrainTypeValues;
+- ExcelMappingEntry;
+- old repository implementations;
+- ExcelGenerator;
+- template mapping;
+- create_template.py.
+
+Do not remove tests for RebuildService, comparison, Passive Rules, report generation, metadata, worker behavior, or the embedded standard path.
+
+STEP 5: REVIEW OTHER REMAINING NON-RUNTIME FILES
+Check these candidates separately:
+
+1. data/word_excel_match_report.json
+This appears to be a generated analysis/report file and is ignored by .gitignore. If it is not tracked and no active runtime/test code reads it, leave it untracked locally or delete it from the working directory. Do not add runtime support for it. Remove stale README references if any.
+
+2. data/metadata.json
+Keep it only if the active Generate tab still records generation history through DataUpdateService. If DataUpdateService has already been removed and no active code reads/writes metadata.json, then remove metadata.json and all associated constants/runtime-copy logic. If generation history is still active, keep both. Make this decision by references, not assumption.
+
+3. app/services/__init__.py, app/ui/__init__.py, app/comparison/__init__.py
+Keep package markers that are needed for clear package structure. Do not delete them merely because they are empty.
+
+4. Empty directories
+After deletions, remove empty directories from the working tree. Do not add placeholder `.gitkeep` files unless the directory is required at runtime and created dynamically.
+
+STEP 6: SIMPLIFY RUNTIME ASSET MANAGEMENT AFTER LEGACY DELETION
+After removing obsolete assets, make `ensure_runtime_assets()` contain only currently required directories and files.
+
+Expected retained asset categories:
+- data directory;
+- logs directory if file logging remains enabled;
+- train_type_variants directory and three active JSON variants;
+- standards/7_7_2 directory;
+- standard metadata;
+- embedded standard workbook;
+- metadata.json only if generation history is still active.
+
+Do not keep imports, directory creation, or copy calls for deleted resources.
+
+Use one small asset-pair sequence if it makes the function clearer, for example a tuple of `(source, target)` pairs iterated once. Do not build a generic asset framework or class.
+
+STEP 7: README MUST MATCH THE FINAL CODE EXACTLY
+Rewrite only stale sections. The final README must no longer mention deleted compatibility components.
+
+The directory tree should describe only directories that exist in the final repository.
+
+The setup should be:
+1. install requirements;
+2. run main.py.
+
+The Train Type generation explanation must describe RebuildService and the three variant JSON files only.
+
+The comparison documentation must remain intact.
+
+Add a short “Generated runtime directories” section explaining:
+- logs/ is created automatically if file logging is enabled;
+- build/ and dist/ are created by PyInstaller;
+- __pycache__/ is created by Python;
+- none of those are source code or tracked in Git.
+
+Do not mention export_full_repo.py because it is a temporary local tool outside the project design.
+
+STEP 8: TESTS AFTER LEGACY REMOVAL
+Keep a compact test suite for active behavior. At minimum retain tests for:
+- RebuildService lists three variants;
+- RebuildService builds a tiny workbook from a temporary JSON fixture;
+- invalid serialized openpyxl object text is rejected;
+- comparison detects a changed cell;
+- comparison preserves the distinction between number 4 and string "00000004";
+- missing sheet detection;
+- Passive Rules basic mapping and disabled mode;
+- deviation actionable policy;
+- report has Summary, List of Project Deviations, All Cell Differences;
+- report raw/actionable separation;
+- worker success and failure cleanup;
+- standard metadata points to the existing embedded standard.
+
+Tests must not import or mention any deleted legacy class, file, JSON, repository, or template.
+
+Do not weaken active-feature tests merely to make deletion easier.
+
+STEP 9: REFERENCE AND IMPORT AUDIT
+After edits, execute repository-wide searches. Every command should return no references, except where the search word appears in this prompt or Git history, which are not runtime files:
+
+Search for:
+- app.repositories
+- BaseRepository
+- LocalJsonRepository
+- SharePointRepository
+- TrainTypeService
+- ExcelGenerator
+- TrainTypeValues
+- ExcelMappingEntry
+- train_type_values.json
+- excel_mapping.json
+- train_type_template.xlsx
+- create_template.py
+- TRAIN_TYPE_TEMPLATE_FILE
+- BUNDLED_TRAIN_TYPE_TEMPLATE_FILE
+- TEMPLATES_DIR
+- RESOURCE_TEMPLATES_DIR
+
+Use `git grep -n` against tracked files. Do not count files inside .git history, build, dist, __pycache__, or temporary exports.
+
+STEP 10: FINAL VALIDATION
+Run:
+
+python -m compileall .
+python -m unittest discover -s tests
+python main.py
+
+For `python main.py`, perform only a startup smoke test if automated GUI interaction is not available. Do not claim full GUI testing unless actually performed.
+
+Also run:
+
+git status --short
+git diff --check
+git ls-files
+
+Verify all of the following:
+- no tracked file imports a deleted module;
+- no stale file path remains in config;
+- runtime_assets does not recreate deleted legacy folders/files;
+- build.ps1 does not bundle deleted templates;
+- README contains no stale legacy instructions;
+- tests contain no deleted-symbol references;
+- the three variant JSON files remain present;
+- standard_7_7_2_precalculated_UNLOCKED.xlsm remains at data/standards/7_7_2/;
+- standard_metadata.json still points to that exact filename;
+- report generation tests pass;
+- comparison tests pass;
+- RebuildService tests pass.
+
+STEP 11: FINAL RESPONSE FORMAT
+Return a concise factual report:
+1. Files deleted.
+2. References removed from each remaining file.
+3. Files deliberately retained and why.
+4. Exact before/after test results.
+5. Exact compileall result.
+6. Exact stale-reference search results.
+7. Git status summary.
+8. Any candidate not deleted because an active reference was found, including exact path and line.
+
+Do not recreate the repositories directory. Do not introduce a replacement legacy layer. Do not touch active Excel data or comparison behavior.
